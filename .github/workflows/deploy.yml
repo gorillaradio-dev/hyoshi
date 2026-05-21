@@ -22,7 +22,7 @@ jobs:
           script: |
             set -e
             cd /var/www/hyoshi-staging
-            git remote set-url origin git@github-hyoshi:gorillaradio/hyoshi.git
+            git remote set-url origin git@github-hyoshi:gorillaradio-dev/hyoshi.git
             rm -rf public/storage
             git pull origin staging
             composer install --no-dev --optimize-autoloader --no-interaction
