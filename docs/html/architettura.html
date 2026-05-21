@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architettura · TrainerHub</title>
+<meta name="description" content="Architettura di TrainerHub: ciclo di una richiesta, multi-tenancy single-database, layer applicativi e modello di dominio.">
+<meta name="doc-title" content="Architettura">
+<meta name="doc-section" content="Architettura">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-root="">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Architettura</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Architettura</span>
+      </div>
+
+      <h1>Architettura</h1>
+
+      <p>
+        Questa pagina descrive come è costruito TrainerHub: i layer applicativi, il percorso di
+        una richiesta HTTP, il funzionamento della multi-tenancy single-database e il modello di
+        dominio. Per l'introduzione al prodotto e allo stack vedi la
+        <a data-href="overview.html">Panoramica</a>.
+      </p>
+
+      <h2 id="layer">Vista d'insieme dei layer</h2>
+      <p>
+        TrainerHub è un monolite full-stack: un backend Laravel che espone pagine
+        <strong>Inertia</strong> (non un'API REST separata) e un frontend React che le renderizza.
+        Il flusso delle dipendenze va dall'alto verso il basso — il frontend consuma le pagine, le
+        pagine arrivano dallo strato HTTP, che delega al dominio, che poggia sui dati.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Layer applicativi</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+flowchart TB
+  subgraph FE["Frontend · React 19 + Inertia"]
+    Pages["Pagine Inertia<br/>resources/js/pages"]
+    Comp["Componenti &amp; Layout<br/>components · layouts"]
+    Hooks["Hook &amp; Utility<br/>useTenant · lib"]
+  end
+  subgraph BE["Backend · Laravel 12"]
+    HTTP["HTTP<br/>route · controller · FormRequest · middleware"]
+    Domain["Dominio<br/>Service · Enum · Policy"]
+    Data["Dati<br/>Modelli Eloquent · migrazioni"]
+  end
+  DB[("MySQL 8<br/>single-database")]
+  Comp --> Pages
+  Hooks --> Pages
+  Pages --> HTTP
+  HTTP --> Domain
+  Domain --> Data
+  Data --> DB
+  HTTP -. "Inertia::render" .-> Pages
+</pre>
+        </div>
+      </div>
+
+      <p>La struttura delle cartelle rispecchia i layer:</p>
+      <table>
+        <thead><tr><th>Layer</th><th>Dove vive</th></tr></thead>
+        <tbody>
+          <tr><td>HTTP</td><td><code>app/Http/Controllers/{Central,Tenant,Settings}</code>, <code>app/Http/Requests</code>, <code>app/Http/Middleware</code>, <code>routes/</code></td></tr>
+          <tr><td>Dominio</td><td><code>app/Services</code>, <code>app/Enums</code>, <code>app/Policies</code></td></tr>
+          <tr><td>Dati</td><td><code>app/Models</code>, <code>database/migrations</code>, <code>database/factories</code></td></tr>
+          <tr><td>Frontend</td><td><code>resources/js/pages</code>, <code>components</code>, <code>layouts</code>, <code>hooks</code>, <code>types</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="richiesta">Ciclo di una richiesta</h2>
+      <p>
+        Ogni richiesta entra dal front controller <code>public/index.php</code>, attraversa lo stack
+        di middleware, raggiunge un controller <em>thin</em> che delega la business logic a un
+        service, il quale interroga i modelli Eloquent. La risposta non è JSON ma una pagina Inertia
+        che il frontend monta come componente React.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Richiesta tenant: GET /app/{slug}/students</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+sequenceDiagram
+  participant B as Browser
+  participant FC as public/index.php
+  participant MW as Middleware
+  participant C as Controller (thin)
+  participant S as Service
+  participant M as Eloquent (global scope)
+  participant DB as MySQL
+  B->>FC: GET /app/{slug}/students
+  FC->>MW: web → auth → InitializeTenancyByPath → tenant.access
+  MW->>C: utente autenticato, tenant inizializzato
+  C->>S: delega la business logic
+  S->>M: query sui modelli
+  M->>DB: SELECT ... WHERE tenant_id = ?
+  DB-->>M: righe
+  M-->>S: modelli
+  S-->>C: dati elaborati
+  C-->>B: Inertia::render(pagina React)
+</pre>
+        </div>
+      </div>
+
+      <h2 id="multi-tenant">Multi-tenancy single-database</h2>
+      <p>
+        Tutti i tenant (le palestre/trainer) condividono lo <strong>stesso database</strong>; ogni
+        tabella tenant-scoped porta una colonna discriminante <code>tenant_id</code>. La libreria
+        <strong>stancl/tenancy</strong> v3 gestisce risoluzione e isolamento.
+      </p>
+      <ul>
+        <li><strong>Identificazione per path.</strong> Le route tenant usano il middleware
+          <code>Stancl\Tenancy\Middleware\InitializeTenancyByPath</code> e il prefisso
+          <code>app/{tenant}</code>. La chiave del tenant è lo <code>slug</code>
+          (<code>Tenant::getTenantKeyName()</code> ritorna <code>'slug'</code>), quindi gli URL
+          hanno la forma <code>/app/{slug}/…</code>.</li>
+        <li><strong>Scope automatico.</strong> I modelli tenant-scoped usano il trait
+          <code>Stancl\Tenancy\Database\Concerns\BelongsToTenant</code>, che applica un global scope
+          su <code>tenant_id</code> e lo assegna in fase di creazione. Ogni query passa dallo scope:
+          un tenant non vede i dati di un altro.</li>
+        <li><strong>Autorizzazione.</strong> Dopo l'inizializzazione, il middleware
+          <code>tenant.access</code> (<code>EnsureTenantAccess</code>) verifica che l'utente
+          autenticato sia il <strong>proprietario</strong> del tenant
+          (<code>tenant()-&gt;owner_id === $request-&gt;user()-&gt;id</code>), altrimenti risponde
+          <code>403</code>.</li>
+      </ul>
+
+      <p>Lo stack di middleware reale delle route tenant (da <code>routes/tenant.php</code>):</p>
+      <pre><code>Route::middleware(['web', 'auth', InitializeTenancyByPath::class, 'tenant.access'])
+    -&gt;prefix('app/{tenant}')</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>L'ordine conta: <code>auth</code> precede l'inizializzazione del tenant, così la
+          verifica di proprietà in <code>tenant.access</code> ha sempre un utente autenticato su cui
+          ragionare. Una <code>TenantCouldNotBeIdentifiedByPathException</code> viene mappata a un
+          <code>404</code> (vedi <code>bootstrap/app.php</code>).</p></div>
+      </div>
+
+      <h2 id="http">Strato HTTP</h2>
+      <p>
+        I controller sono <em>thin</em>: validano tramite FormRequest, applicano le Policy
+        (<code>StudentPolicy</code>, <code>GroupPolicy</code>) e delegano la logica ai service. Le
+        route tenant coprono la gestione di allievi, gruppi e pagamenti:
+      </p>
+      <table>
+        <thead><tr><th>Metodo</th><th>Path (sotto <code>/app/{tenant}</code>)</th><th>Controller · azione</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge get">GET</span></td><td><code>students</code></td><td>StudentController@index — elenco con filtri</td></tr>
+          <tr><td><span class="badge get">GET</span></td><td><code>students/search</code></td><td>StudentController@search</td></tr>
+          <tr><td><span class="badge post">POST</span></td><td><code>students</code></td><td>StudentController@store</td></tr>
+          <tr><td><span class="badge post">PUT</span></td><td><code>students/{student}/suspend</code></td><td>StudentController@suspend</td></tr>
+          <tr><td><span class="badge post">POST</span></td><td><code>students/{student}/payments/monthly</code></td><td>StudentPaymentController@registerMonthly</td></tr>
+          <tr><td><span class="badge post">POST</span></td><td><code>students/{student}/payments/enrollment</code></td><td>StudentPaymentController@registerEnrollment</td></tr>
+          <tr><td><span class="badge post">POST</span></td><td><code>students/{student}/groups</code></td><td>StudentGroupController@attach</td></tr>
+          <tr><td><span class="badge delete">DEL</span></td><td><code>students/{student}/groups/{group}</code></td><td>StudentGroupController@detach</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Oltre alle route tenant esistono le route <strong>central</strong> (onboarding di un nuovo
+        tenant) e <strong>settings</strong> (profilo, password, 2FA via Laravel Fortify), definite
+        in <code>routes/web.php</code> e <code>routes/settings.php</code>.
+      </p>
+
+      <h2 id="dominio">Strato di dominio: il motore delle quote</h2>
+      <p>
+        La logica di business vive nei service, mai nei controller. Il cuore del dominio è il
+        calcolo di quote e pagamenti, suddiviso in tre service. Tutti gli importi monetari sono
+        <strong>interi in centesimi</strong> (es. <code>5000</code> = €50,00).
+      </p>
+      <ul>
+        <li><strong><code>FeeCalculationService</code></strong> — calcoli puri sullo stato corrente:
+          <ul>
+            <li><code>getEffectiveRate()</code>: tariffa mensile effettiva, con priorità
+              <code>monthly_fee_override</code> → minimo tra le <code>monthly_fee_amount</code> dei
+              gruppi dell'allievo → <code>null</code> se non ci sono né override né gruppi.</li>
+            <li><code>getBalance()</code>: saldo = totale pagato − totale quote mensili attese −
+              totale iscrizioni attese (positivo = credito, negativo = debito).</li>
+          </ul>
+        </li>
+        <li><strong><code>MonthlyFeeService</code></strong> (dipende da <code>FeeCalculationService</code>) —
+          gestisce le quote mensili ancorate a <code>current_cycle_started_at</code>:
+          <ul>
+            <li><code>getUncoveredPeriods()</code>: i mesi <code>YYYY-MM</code> dovuti ma senza una
+              <code>MonthlyFee</code> registrata.</li>
+            <li><code>registerPayment(student, months, amount)</code>: crea un <code>Payment</code> e
+              le <code>MonthlyFee</code> che coprono i periodi scoperti più vecchi per primi (FIFO),
+              estendendo nel futuro se necessario; al primo pagamento fissa l'inizio del ciclo.</li>
+          </ul>
+        </li>
+        <li><strong><code>EnrollmentFeeService</code></strong> — gestisce le quote di iscrizione:
+          <code>registerEnrollment()</code> usa la durata da
+          <code>tenant()-&gt;settings['enrollment_duration_months']</code> (default 12 mesi) e, in
+          caso di rinnovo anticipato, parte dalla scadenza dell'iscrizione ancora valida.
+          <code>hasValidEnrollment()</code> determina se l'allievo è in regola.</li>
+      </ul>
+
+      <h2 id="dati">Modello di dominio</h2>
+      <p>
+        I modelli usano <strong>UUID</strong> come chiave primaria (<code>HasUuids</code>), gli
+        importi sono in centesimi e <code>Student</code> usa il <em>soft delete</em>. Relazioni
+        principali:
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Entità e relazioni</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+erDiagram
+  USER ||--o| TENANT : "possiede"
+  TENANT ||--o{ STUDENT : "ha"
+  STUDENT ||--o{ MONTHLY_FEE : "quote mensili"
+  STUDENT ||--o{ ENROLLMENT_FEE : "iscrizioni"
+  STUDENT ||--o{ PAYMENT : "pagamenti"
+  STUDENT ||--o{ DOCUMENT : "documenti"
+  STUDENT ||--o{ EMERGENCY_CONTACT : "contatti"
+  STUDENT }o--o{ GROUP : "group_student"
+  PAYMENT ||--o{ MONTHLY_FEE : "copre"
+  PAYMENT ||--o{ ENROLLMENT_FEE : "copre"
+</pre>
+        </div>
+      </div>
+
+      <p>
+        Un <code>Payment</code> è la registrazione monetaria; le <code>MonthlyFee</code> e
+        <code>EnrollmentFee</code> sono le quote <em>attese</em> che quel pagamento copre
+        (entrambe con <code>expected_amount</code> e un riferimento <code>payment_id</code>). La
+        relazione molti-a-molti tra <code>Student</code> e <code>Group</code> passa dalla pivot
+        <code>group_student</code> (modello <code>GroupStudent</code>) con il flag
+        <code>is_primary</code>.
+      </p>
+
+      <h3 id="status">Ciclo di vita dell'allievo</h3>
+      <p>
+        Lo stato mostrato dall'allievo (<code>effective_status</code>) è in parte
+        <strong>calcolato</strong>: <code>Suspended</code> è uno stato persistito impostato
+        manualmente; quando l'allievo non è sospeso, lo stato è <code>Active</code> se ha
+        un'iscrizione valida (<code>hasValidEnrollment</code>), altrimenti <code>Pending</code>.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Stati dell'allievo</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Pending: creato senza iscrizione valida
+  Pending --> Active: iscrizione valida
+  Active --> Pending: iscrizione scaduta
+  Pending --> Suspended: sospensione manuale
+  Active --> Suspended: sospensione manuale
+  Suspended --> Pending: riattivazione
+</pre>
+        </div>
+      </div>
+
+      <h2 id="frontend">Frontend (React + Inertia)</h2>
+      <p>
+        Il frontend è una SPA React 19 montata da Inertia: l'entry point
+        <code>resources/js/app.tsx</code> risolve e renderizza le pagine di
+        <code>resources/js/pages</code>, che corrispondono ai controller backend. I componenti
+        riutilizzabili (form, dialog, navigazione) stanno in <code>resources/js/components</code>,
+        i layout persistenti in <code>resources/js/layouts</code>.
+      </p>
+      <ul>
+        <li><strong>shadcn/ui + Tailwind CSS 4</strong> per la UI; i primitivi shadcn vivono in
+          <code>resources/js/components/ui</code>.</li>
+        <li><strong>Mobile-first.</strong> Il <code>tenant-layout</code> alterna sidebar desktop e
+          navigazione mobile (bottom-nav), perché il trainer usa spesso il telefono.</li>
+        <li><strong>Hook <code>useTenant</code></strong> per accedere al tenant corrente nei
+          componenti tenant-scoped; tipi di dominio condivisi in <code>resources/js/types</code>.</li>
+      </ul>
+
+      <h2 id="convenzioni">Convenzioni trasversali</h2>
+      <ul>
+        <li>Controller thin → validazione in <strong>FormRequest</strong>, logica nei
+          <strong>Service</strong>.</li>
+        <li>Ogni modello tenant-scoped <strong>deve</strong> usare <code>BelongsToTenant</code> e
+          avere una <strong>Policy</strong>.</li>
+        <li>Valori a dominio fisso espressi con <strong>backed enum</strong> PHP
+          (<code>StudentStatus</code>, <code>PaymentMethod</code>, <code>DocumentType</code>,
+          <code>DocumentStatus</code>).</li>
+        <li><strong>UUID</strong> ovunque, importi monetari come <strong>interi in centesimi</strong>.</li>
+        <li>Codice e commenti in inglese; label e messaggi utente in italiano.</li>
+      </ul>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Le regole complete di progetto (struttura cartelle, naming, sicurezza, testing)
+          sono in <code>CLAUDE.md</code> nella radice del repository.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="assets/vendor/mermaid.min.js"></script>
+<script src="assets/search-index.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
