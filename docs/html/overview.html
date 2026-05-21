@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panoramica · TrainerHub</title>
+<meta name="description" content="Cos'è TrainerHub, lo stack tecnologico e l'architettura multi-tenant.">
+<meta name="doc-title" content="Panoramica">
+<meta name="doc-section" content="Inizia">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-root="">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Inizia</span><span class="sep">/</span>
+        <span>Panoramica</span>
+      </div>
+
+      <h1>Panoramica</h1>
+
+      <p>
+        <strong>TrainerHub</strong> è un gestionale <strong>multi-tenant</strong> pensato per i
+        personal trainer: ogni trainer (tenant) gestisce in autonomia i propri studenti, le quote
+        mensili e i pagamenti, con i dati completamente isolati dagli altri tenant.
+      </p>
+
+      <h2 id="cose">Cos'è</h2>
+      <p>
+        L'obiettivo è dare al trainer un unico posto da cui seguire gli studenti e tenere sotto
+        controllo gli incassi. Il prodotto è mobile-first: il trainer lo usa spesso dal telefono,
+        a bordo campo o in palestra.
+      </p>
+
+      <h2 id="stack">Stack tecnologico</h2>
+      <ul>
+        <li><strong>Backend:</strong> Laravel 12 (PHP 8.3)</li>
+        <li><strong>Frontend:</strong> React 19 + Inertia.js 2.x + TypeScript (Laravel React Starter Kit)</li>
+        <li><strong>UI:</strong> shadcn/ui + Tailwind CSS 4</li>
+        <li><strong>Multi-tenancy:</strong> stancl/tenancy v3 in modalità single-database</li>
+        <li><strong>Billing:</strong> Laravel Cashier (Stripe)</li>
+        <li><strong>Database:</strong> MySQL 8</li>
+      </ul>
+
+      <h2 id="multi-tenant">Architettura multi-tenant</h2>
+      <p>
+        TrainerHub usa un <strong>singolo database</strong> con una colonna discriminante
+        <code>tenant_id</code> su ogni tabella tenant-scoped. Il tenant corrente è risolto dal
+        path della URL: le route tenant vivono sotto <code>/app/{tenant:slug}/…</code>.
+      </p>
+      <ul>
+        <li>I modelli tenant-scoped usano il trait <code>BelongsToTenant</code>, che applica un
+          global scope automatico e assegna <code>tenant_id</code> in fase di creazione.</li>
+        <li>L'accesso ai dati di un tenant passa <strong>sempre</strong> dal global scope: un tenant
+          non può mai vedere i dati di un altro.</li>
+        <li>Lo stack di middleware delle route tenant è
+          <code>identify.tenant → tenant.access → subscribed</code>.</li>
+      </ul>
+
+      <h2 id="concetti">Concetti chiave</h2>
+      <ul>
+        <li><strong>Tenant</strong> — il personal trainer e il suo spazio dati isolato.</li>
+        <li><strong>Student</strong> — lo studente seguito dal trainer.</li>
+        <li><strong>Monthly fee</strong> — la quota mensile dovuta dallo studente; gli importi
+          monetari sono salvati come interi in centesimi (es. <code>5000</code> = €50,00).</li>
+      </ul>
+
+      <h2 id="convenzioni">Convenzioni</h2>
+      <p>
+        Codice, nomi e commenti sono in <strong>inglese</strong>; le label e i messaggi rivolti
+        all'utente sono in <strong>italiano</strong>. Gli ID sono UUID ovunque.
+      </p>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="assets/vendor/mermaid.min.js"></script>
+<script src="assets/search-index.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
