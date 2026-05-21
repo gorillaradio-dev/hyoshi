@@ -1,0 +1,81 @@
+name: Sync docs to central portal
+
+# Mirror this repo's static docs into the central docs repo
+# (gorillaradio-dev/go-docs), under a per-project subfolder. The central
+# repo is auto-deployed to docs.gorillaradio.dev by a Cloudflare Worker,
+# so a push there is effectively a deploy.
+#
+# To reuse this workflow on another project, copy it as-is and edit only
+# the four env vars below.
+#
+# Prerequisite: a repo secret DOCS_SYNC_TOKEN — a fine-grained PAT with
+# Contents:Write scoped ONLY to the central repo.
+#
+# NOTE: trigger su `staging` (non `main`) perché in questo repo staging è
+# il branch attivo dove confluisce il lavoro e gira il deploy.
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'docs/html/**'
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: hyoshi
+  SOURCE_DIR: docs/html
+  CENTRAL_REPO: gorillaradio-dev/go-docs
+  CENTRAL_BRANCH: main
+
+# Serialise runs so a fast double-push can't race the rsync + push.
+concurrency:
+  group: sync-docs-${{ github.ref }}
+  cancel-in-progress: false
+
+# This workflow only reads from the current repo; writes go to the central
+# repo via DOCS_SYNC_TOKEN, so GITHUB_TOKEN can stay read-only.
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo (${{ github.repository }})
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Checkout central docs repo (${{ env.CENTRAL_REPO }})
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_REPO }}
+          token: ${{ secrets.DOCS_SYNC_TOKEN }}
+          ref: ${{ env.CENTRAL_BRANCH }}
+          path: central
+
+      - name: Mirror ${{ env.SOURCE_DIR }}/ → ${{ env.CENTRAL_REPO }}:${{ env.PROJECT_NAME }}/
+        run: |
+          set -euo pipefail
+          # First-run safety: the project subfolder may not exist yet on central.
+          mkdir -p "central/${PROJECT_NAME}"
+          # --delete makes this a true mirror: files removed from source
+          # also disappear from central. Trailing slashes are intentional:
+          # "src/" means "contents of src", "dst/" means "into dst".
+          rsync -av --delete "source/${SOURCE_DIR}/" "central/${PROJECT_NAME}/"
+
+      - name: Commit and push to central (skip if no changes)
+        working-directory: central
+        run: |
+          set -euo pipefail
+          git config user.name  "Docs Sync Bot"
+          git config user.email "docs-sync@users.noreply.github.com"
+          # Stage adds/modifies/deletes under the project subfolder only.
+          git add -A "${PROJECT_NAME}"
+          if git diff --staged --quiet; then
+            echo "No changes — central is already in sync."
+            exit 0
+          fi
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          git commit -m "docs(${PROJECT_NAME}): sync from ${SHORT_SHA}"
+          git push origin "${CENTRAL_BRANCH}"

@@ -1,0 +1,1 @@
+window.__SEARCH_INDEX__ = [{"url":"index.html","title":"TrainerHub — Home","section":"Home","text":"Gestionale multi-tenant per personal trainer: studenti, quote mensili e pagamenti, con isolamento per tenant."},{"url":"overview.html","title":"Panoramica","section":"Inizia","text":"Cos · Cos'è · Stack tecnologico · Architettura multi-tenant · Concetti chiave · Convenzioni"}];
