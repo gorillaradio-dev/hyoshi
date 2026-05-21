@@ -1,4 +1,12 @@
 {
+  "extraKnownMarketplaces": {
+    "gorillaradio-dev-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "gorillaradio-dev/claude-plugins"
+      }
+    }
+  },
   "enabledPlugins": {
     "gorilla-docs@gorillaradio-dev-claude-plugins": true
   }
