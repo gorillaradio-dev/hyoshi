@@ -1,0 +1,59 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+# Use ! prefix to force-include something excluded by defaults.
+#
+# Built-in defaults (always excluded unless negated):
+#   node_modules/, .git/, vendor/, dist/, build/, *.lock, *.min.js, images, etc.
+
+# --- Tooling / agent / config dirs (not project code) ---
+.agents/
+.superpowers/
+.claude/
+.understand-anything/
+
+# --- Laravel runtime placeholders & caches ---
+storage/
+bootstrap/cache/
+bootstrap/ssr/
+database/database.sqlite
+
+# --- Design assets (images + encrypted .pen, unreadable) ---
+design/
+
+# --- Vendored UI primitives (shadcn/ui — generated, not authored) ---
+resources/js/components/ui/
+
+# --- Generated HTML docs portal (built artifact, includes minified vendor) ---
+docs/html/
+
+# --- Wayfinder / generated frontend route helpers (gitignored, generated) ---
+resources/js/actions/
+resources/js/routes/
+resources/js/wayfinder/
+
+# --- Misc ---
+.DS_Store
+.env
+.env.example
+
+# ============================================================
+# OPTIONAL — toggled based on chosen analysis scope (see below)
+# ============================================================
+
+# Test suite (Pest/PHPUnit feature & unit tests)
+# tests/
+
+# Project documentation (markdown plans, specs, architecture notes)
+# docs/
+
+# Stock Laravel framework config (keep config/tenancy.php — core to architecture)
+# config/app.php
+# config/auth.php
+# config/cache.php
+# config/database.php
+# config/filesystems.php
+# config/logging.php
+# config/mail.php
+# config/queue.php
+# config/services.php
+# config/session.php
