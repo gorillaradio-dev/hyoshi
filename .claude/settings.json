@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "gorilla-docs@gorillaradio-dev-claude-plugins": true
+  }
+}
