@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modello dati · TrainerHub</title>
+<meta name="description" content="Modello dati di TrainerHub: entità, relazioni, schema delle tabelle, enum e convenzioni (UUID, centesimi, tenant scope, soft delete).">
+<meta name="doc-title" content="Modello dati">
+<meta name="doc-section" content="Architettura">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-root="">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Architettura</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Architettura</span><span class="sep">/</span>
+        <span>Modello dati</span>
+      </div>
+
+      <h1>Modello dati</h1>
+
+      <p>
+        Riferimento dello strato dati di TrainerHub: entità Eloquent, relazioni, schema delle
+        tabelle, enum e convenzioni trasversali. Per il contesto architetturale (richiesta,
+        multi-tenancy, service) vedi <a data-href="architettura.html">Architettura</a>.
+      </p>
+
+      <h2 id="panoramica">Panoramica delle entità</h2>
+      <p>
+        Le entità si dividono in due famiglie: quelle <strong>tenant-scoped</strong> (portano una
+        colonna <code>tenant_id</code> e il trait <code>BelongsToTenant</code>) e quelle
+        <strong>centrali</strong> (<code>User</code> e <code>Tenant</code>), che vivono fuori dallo
+        scope di tenant.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Entità e relazioni</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+erDiagram
+  USER ||--o{ TENANT : "possiede (owner_id)"
+  USER ||--o| TENANT : "current_tenant_id"
+  TENANT ||--o{ STUDENT : "ha"
+  STUDENT ||--o{ EMERGENCY_CONTACT : "contatti"
+  STUDENT ||--o{ DOCUMENT : "documenti"
+  STUDENT ||--o{ PAYMENT : "pagamenti"
+  STUDENT ||--o{ MONTHLY_FEE : "quote mensili"
+  STUDENT ||--o{ ENROLLMENT_FEE : "iscrizioni"
+  STUDENT }o--o{ GROUP : "group_student (is_primary)"
+  PAYMENT ||--o{ MONTHLY_FEE : "copre"
+  PAYMENT ||--o{ ENROLLMENT_FEE : "copre"
+</pre>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p><strong>Centrali vs tenant-scoped.</strong> <code>User</code> (il trainer) e
+          <code>Tenant</code> (la palestra) non hanno <code>tenant_id</code>. Tutte le altre entità
+          lo portano e sono filtrate automaticamente dal global scope di
+          <code>BelongsToTenant</code>.</p></div>
+      </div>
+
+      <h2 id="convenzioni">Convenzioni dello strato dati</h2>
+      <ul>
+        <li><strong>Chiavi UUID.</strong> Ogni modello usa <code>HasUuids</code>: la PK <code>id</code>
+          è uno UUID stringa, così come le foreign key.</li>
+        <li><strong>Tenant key = slug.</strong> La colonna <code>tenant_id</code> è una
+          <code>string</code> che referenzia <code>tenants.slug</code> (non l'<code>id</code>), con
+          <code>cascadeOnDelete</code>: eliminando un tenant si cancellano a cascata tutti i suoi dati.</li>
+        <li><strong>Importi in centesimi.</strong> Tutti i campi monetari
+          (<code>amount</code>, <code>expected_amount</code>, <code>monthly_fee_amount</code>,
+          <code>monthly_fee_override</code>) sono <code>integer</code> in centesimi
+          (es. <code>5000</code> = €50,00) e castati a <code>integer</code>.</li>
+        <li><strong>Enum castati.</strong> I campi a dominio fisso usano backed enum PHP
+          (<code>StudentStatus</code>, <code>PaymentMethod</code>, <code>DocumentType</code>,
+          <code>DocumentStatus</code>) castati direttamente nel modello.</li>
+        <li><strong>Soft delete.</strong> Solo <code>Student</code> usa <code>SoftDeletes</code>
+          (<code>deleted_at</code>); le altre entità si eliminano fisicamente (o a cascata).</li>
+        <li><strong>Indici tenant-first.</strong> Gli indici iniziano da <code>tenant_id</code>
+          (es. <code>(tenant_id, status)</code>) per supportare le query già filtrate per tenant.</li>
+      </ul>
+
+      <h2 id="tenant-scoped">Entità tenant-scoped</h2>
+
+      <h3 id="student">Student</h3>
+      <p>L'entità centrale del dominio: l'allievo. Usa <code>SoftDeletes</code>.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>first_name</code>, <code>last_name</code></td><td>string</td><td>obbligatori</td></tr>
+          <tr><td><code>email</code>, <code>phone</code>, <code>date_of_birth</code>, <code>fiscal_code</code>, <code>address</code></td><td>string/date</td><td>nullable — anagrafica</td></tr>
+          <tr><td><code>status</code></td><td>string · <code>StudentStatus</code></td><td>nullable; vedi <code>effective_status</code> (calcolato)</td></tr>
+          <tr><td><code>enrolled_at</code></td><td>date</td><td>nullable</td></tr>
+          <tr><td><code>monthly_fee_override</code></td><td>integer (cents)</td><td>nullable — override tariffa mensile</td></tr>
+          <tr><td><code>current_cycle_started_at</code></td><td>date</td><td>nullable — ancora del ciclo quote</td></tr>
+          <tr><td><code>past_cycles</code></td><td>json</td><td>nullable — storico cicli</td></tr>
+          <tr><td><code>phone_contact_id</code></td><td>uuid</td><td>FK → <code>emergency_contacts</code> (contatto telefonico principale)</td></tr>
+          <tr><td><code>notes</code></td><td>text</td><td>nullable</td></tr>
+          <tr><td><code>deleted_at</code></td><td>timestamp</td><td>soft delete</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>Relazioni:</strong> <code>hasMany</code> emergencyContacts, documents, payments,
+        monthlyFees, enrollmentFees · <code>belongsToMany</code> groups (pivot
+        <code>group_student</code>, attributo <code>is_primary</code>) · <code>belongsTo</code>
+        phoneContact (<code>EmergencyContact</code>).
+        <strong>Accessor:</strong> <code>effective_status</code> e <code>effective_phone</code> (calcolati, non persistiti).
+      </p>
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>La tabella conserva ancora le colonne legacy <code>emergency_contact_name</code> /
+          <code>emergency_contact_phone</code> e un <code>user_id</code> nullable: non sono più usate
+          dal modello (i contatti sono stati spostati nella tabella <code>emergency_contacts</code>).</p></div>
+      </div>
+
+      <h3 id="group">Group</h3>
+      <p>Gruppo di allenamento con la propria tariffa mensile.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>name</code></td><td>string</td><td>obbligatorio</td></tr>
+          <tr><td><code>description</code></td><td>text</td><td>nullable</td></tr>
+          <tr><td><code>color</code></td><td>string(7)</td><td>colore esadecimale (es. <code>#3DD7C5</code>)</td></tr>
+          <tr><td><code>monthly_fee_amount</code></td><td>integer (cents)</td><td>tariffa mensile del gruppo</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsToMany</code> students (pivot <code>group_student</code>).</p>
+
+      <h3 id="payment">Payment</h3>
+      <p>La registrazione monetaria. Le quote (<code>MonthlyFee</code>/<code>EnrollmentFee</code>) vi si agganciano.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code>, cascade</td></tr>
+          <tr><td><code>amount</code></td><td>integer (cents)</td><td>importo pagato</td></tr>
+          <tr><td><code>payment_method</code></td><td>string · <code>PaymentMethod</code></td><td>al momento solo <code>cash</code></td></tr>
+          <tr><td><code>paid_at</code></td><td>timestamp</td><td>data del pagamento</td></tr>
+          <tr><td><code>notes</code></td><td>text</td><td>nullable</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsTo</code> student · <code>hasMany</code> monthlyFees, enrollmentFees.</p>
+
+      <h3 id="monthly-fee">MonthlyFee</h3>
+      <p>La quota mensile <em>attesa</em> per un periodo, generata quando si registra un pagamento.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code>, cascade</td></tr>
+          <tr><td><code>payment_id</code></td><td>uuid</td><td>FK → <code>payments</code>, cascade</td></tr>
+          <tr><td><code>period</code></td><td>string</td><td>mese coperto, formato <code>YYYY-MM</code></td></tr>
+          <tr><td><code>expected_amount</code></td><td>integer (cents)</td><td>importo atteso per il periodo</td></tr>
+          <tr><td><code>due_date</code></td><td>date</td><td>scadenza</td></tr>
+          <tr><td><code>notes</code></td><td>text</td><td>nullable</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Vincolo:</strong> <code>UNIQUE (tenant_id, student_id, period)</code> — una sola quota per allievo per mese. <strong>Relazioni:</strong> <code>belongsTo</code> student, payment.</p>
+
+      <h3 id="enrollment-fee">EnrollmentFee</h3>
+      <p>La quota di iscrizione con la sua finestra di validità.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code>, cascade</td></tr>
+          <tr><td><code>payment_id</code></td><td>uuid</td><td>FK → <code>payments</code>, cascade</td></tr>
+          <tr><td><code>expected_amount</code></td><td>integer (cents)</td><td>importo iscrizione</td></tr>
+          <tr><td><code>starts_at</code>, <code>expires_at</code></td><td>date</td><td>finestra di validità dell'iscrizione</td></tr>
+          <tr><td><code>notes</code></td><td>text</td><td>nullable</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsTo</code> student, payment.</p>
+
+      <h3 id="group-student">GroupStudent (pivot)</h3>
+      <p>Tabella pivot della relazione molti-a-molti tra allievi e gruppi (modello <code>Pivot</code> con UUID).</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>group_id</code></td><td>uuid</td><td>FK → <code>groups</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code>, cascade</td></tr>
+          <tr><td><code>is_primary</code></td><td>boolean</td><td>default <code>false</code> — gruppo principale dell'allievo</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Vincolo:</strong> <code>UNIQUE (tenant_id, group_id, student_id)</code> — niente iscrizioni duplicate.</p>
+
+      <h3 id="document">Document</h3>
+      <p>Documento dell'allievo (certificato medico, documento d'identità, consenso privacy, ecc.).</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code></td></tr>
+          <tr><td><code>type</code></td><td>string · <code>DocumentType</code></td><td>tipo documento</td></tr>
+          <tr><td><code>title</code>, <code>file_path</code></td><td>string</td><td>titolo e percorso file</td></tr>
+          <tr><td><code>delivered_at</code>, <code>expires_at</code></td><td>date</td><td>consegna e scadenza</td></tr>
+          <tr><td><code>status</code></td><td>string · <code>DocumentStatus</code></td><td>stato documento</td></tr>
+          <tr><td><code>notes</code></td><td>text</td><td>nullable</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsTo</code> student.</p>
+
+      <h3 id="emergency-contact">EmergencyContact</h3>
+      <p>Contatto di emergenza dell'allievo (estratto dalle colonne inline di <code>students</code>).</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>tenant_id</code></td><td>string</td><td>FK → <code>tenants.slug</code>, cascade</td></tr>
+          <tr><td><code>student_id</code></td><td>uuid</td><td>FK → <code>students</code></td></tr>
+          <tr><td><code>name</code>, <code>phone</code></td><td>string</td><td>nome e telefono del contatto</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsTo</code> student. È anche il bersaglio di <code>Student.phoneContact</code> (contatto telefonico principale).</p>
+
+      <h2 id="centrali">Entità centrali</h2>
+      <p>Vivono fuori dallo scope di tenant: non hanno <code>tenant_id</code>.</p>
+
+      <h3 id="tenant">Tenant</h3>
+      <p>La palestra/trainer. Estende il modello base di stancl/tenancy; la sua chiave è lo <code>slug</code>.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>string</td><td>PK</td></tr>
+          <tr><td><code>name</code></td><td>string</td><td>nome della palestra</td></tr>
+          <tr><td><code>slug</code></td><td>string</td><td><strong>unique</strong> — chiave del tenant, usata nelle route <code>/app/{slug}/…</code></td></tr>
+          <tr><td><code>owner_id</code></td><td>uuid</td><td>FK → <code>users</code> — il trainer proprietario</td></tr>
+          <tr><td><code>settings</code></td><td>json</td><td>nullable — es. <code>enrollment_duration_months</code></td></tr>
+          <tr><td><code>stripe_account_id</code></td><td>string</td><td>nullable — billing (Sprint 2)</td></tr>
+          <tr><td><code>status</code></td><td>string</td><td>default <code>active</code></td></tr>
+          <tr><td><code>trial_ends_at</code></td><td>timestamp</td><td>nullable</td></tr>
+          <tr><td><code>data</code></td><td>json</td><td>nullable — colonna extra di stancl/tenancy</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>belongsTo</code> owner (<code>User</code>) · <code>hasMany</code> students.</p>
+
+      <h3 id="user">User</h3>
+      <p>Il trainer autenticato. Estende <code>Authenticatable</code> con 2FA di Laravel Fortify.</p>
+      <table>
+        <thead><tr><th>Colonna</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>uuid</td><td>PK</td></tr>
+          <tr><td><code>name</code>, <code>email</code></td><td>string</td><td>email univoca</td></tr>
+          <tr><td><code>password</code></td><td>string</td><td>cast <code>hashed</code>, nascosto</td></tr>
+          <tr><td><code>current_tenant_id</code></td><td>string</td><td>tenant attivo selezionato</td></tr>
+          <tr><td><code>two_factor_secret</code>, <code>two_factor_recovery_codes</code>, <code>two_factor_confirmed_at</code></td><td>—</td><td>2FA Fortify (i primi due nascosti)</td></tr>
+          <tr><td><code>email_verified_at</code></td><td>timestamp</td><td>verifica email</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Relazioni:</strong> <code>hasMany</code> tenants (come <code>owner_id</code>) · <code>belongsTo</code> currentTenant.</p>
+
+      <h2 id="enum">Enum</h2>
+      <table>
+        <thead><tr><th>Enum</th><th>Valori</th><th>Usato da</th></tr></thead>
+        <tbody>
+          <tr><td><code>StudentStatus</code></td><td><code>pending</code>, <code>active</code>, <code>suspended</code></td><td><code>Student.status</code></td></tr>
+          <tr><td><code>PaymentMethod</code></td><td><code>cash</code></td><td><code>Payment.payment_method</code></td></tr>
+          <tr><td><code>DocumentType</code></td><td><code>medical_certificate</code>, <code>identity_doc</code>, <code>privacy_consent</code>, <code>other</code></td><td><code>Document.type</code></td></tr>
+          <tr><td><code>DocumentStatus</code></td><td><code>pending</code>, <code>delivered</code>, <code>expired</code>, <code>expiring_soon</code></td><td><code>Document.status</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="vincoli">Vincoli e indici notevoli</h2>
+      <ul>
+        <li><code>UNIQUE (tenant_id, student_id, period)</code> su <code>monthly_fees</code> — una quota per allievo per mese.</li>
+        <li><code>UNIQUE (tenant_id, group_id, student_id)</code> su <code>group_student</code> — niente doppie iscrizioni a un gruppo.</li>
+        <li><code>tenants.slug</code> è <code>unique</code> ed è il bersaglio di tutte le FK <code>tenant_id</code>.</li>
+        <li><code>cascadeOnDelete</code> su <code>tenant_id</code> e <code>student_id</code>: eliminando un tenant (o un allievo) si cancellano a cascata i dati collegati.</li>
+        <li>Indici tenant-first su quasi tutte le tabelle (es. <code>(tenant_id, status)</code>, <code>(tenant_id, due_date)</code>).</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="assets/vendor/mermaid.min.js"></script>
+<script src="assets/search-index.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
