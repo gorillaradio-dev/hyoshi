@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useTenant } from '@/hooks/use-tenant';
-import { cn } from '@/lib/utils';
 import { getTenantNavItems } from '@/lib/tenant-nav';
+import { cn } from '@/lib/utils';
 
 export function TenantBottomNav() {
     const tenant = useTenant();

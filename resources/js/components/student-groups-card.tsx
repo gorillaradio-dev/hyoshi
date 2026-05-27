@@ -1,11 +1,11 @@
+import { router } from '@inertiajs/react';
+import { X } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTenant } from '@/hooks/use-tenant';
 import type { Group } from '@/types';
-import { router } from '@inertiajs/react';
-import { X } from 'lucide-react';
-import { useState } from 'react';
 
 type AssignedGroup = {
     id: string;

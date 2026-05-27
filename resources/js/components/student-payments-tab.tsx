@@ -1,12 +1,12 @@
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { Banknote, GraduationCap } from 'lucide-react';
+import { useState } from 'react';
 import RegisterEnrollmentDialog from '@/components/register-enrollment-dialog';
 import RegisterMonthlyDialog from '@/components/register-monthly-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Payment, PaymentData } from '@/types';
-import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
-import { Banknote, GraduationCap } from 'lucide-react';
-import { useState } from 'react';
 
 type Props = {
     studentId: string;

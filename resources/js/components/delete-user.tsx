@@ -1,7 +1,9 @@
 import { Form } from '@inertiajs/react';
+import { TriangleAlert } from 'lucide-react';
 import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/heading';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -14,8 +16,6 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { TriangleAlert } from 'lucide-react';
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);

@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { useTenant } from '@/hooks/use-tenant';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,6 +11,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useTenant } from '@/hooks/use-tenant';
 import { getTenantNavItems } from '@/lib/tenant-nav';
 
 export function TenantSidebar() {

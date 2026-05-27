@@ -1,14 +1,14 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useTenant } from '@/hooks/use-tenant';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { UserInfo } from '@/components/user-info';
-import { UserMenuContent } from '@/components/user-menu-content';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { UserInfo } from '@/components/user-info';
+import { UserMenuContent } from '@/components/user-menu-content';
+import { useTenant } from '@/hooks/use-tenant';
 
 export function TenantMobileHeader() {
     const { auth } = usePage().props;

@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
-import type { ReactNode } from 'react';
 
 export default function TenantDashboard() {
     const tenant = useTenant();

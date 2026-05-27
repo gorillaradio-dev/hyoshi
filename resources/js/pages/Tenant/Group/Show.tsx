@@ -1,3 +1,7 @@
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Pencil, X } from 'lucide-react';
+import {  useEffect, useRef, useState } from 'react';
+import type {ReactElement} from 'react';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,9 +9,6 @@ import { Input } from '@/components/ui/input';
 import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
 import type { Group } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Pencil, X } from 'lucide-react';
-import { type ReactElement, useEffect, useRef, useState } from 'react';
 
 type StudentSummary = {
     id: string;

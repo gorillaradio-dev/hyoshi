@@ -1,5 +1,5 @@
-import type { SharedTenant } from '@/types/auth';
 import { usePage } from '@inertiajs/react';
+import type { SharedTenant } from '@/types/auth';
 
 export function useTenant(): SharedTenant {
     const { tenant } = usePage().props;

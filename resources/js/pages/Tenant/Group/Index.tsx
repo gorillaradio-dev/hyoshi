@@ -1,3 +1,6 @@
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import type { ReactElement } from 'react';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,9 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
 import type { Group } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
-import type { ReactElement } from 'react';
 
 type Props = {
     groups: Group[];

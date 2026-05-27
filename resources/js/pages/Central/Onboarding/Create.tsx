@@ -1,11 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
+import type { FormEvent, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import CentralLayout from '@/layouts/central-layout';
-import type { FormEvent, ReactNode } from 'react';
 
 function slugify(text: string): string {
     return text

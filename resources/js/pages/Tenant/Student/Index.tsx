@@ -1,3 +1,7 @@
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus, SlidersHorizontal } from 'lucide-react';
+import {  useState } from 'react';
+import type {ReactNode} from 'react';
 import { PageHeader } from '@/components/page-header';
 import RegisterMonthlyDialog from '@/components/register-monthly-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +14,9 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from '@/components/ui/drawer';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -28,15 +34,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
 import { statusLabel, statusVariant } from '@/lib/student-status';
 import type { LatestEnrollment, Student, StudentFilters, StudentPaymentInfo, StudentStatus } from '@/types';
-import { useTenant } from '@/hooks/use-tenant';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, SlidersHorizontal } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
 
 type PaymentDataResponse = {
     effectiveRate: number | null;

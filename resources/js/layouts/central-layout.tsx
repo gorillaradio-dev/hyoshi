@@ -1,14 +1,14 @@
 import { Link, usePage } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { UserMenuContent } from '@/components/user-menu-content';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { UserInfo } from '@/components/user-info';
-import type { ReactNode } from 'react';
+import { UserMenuContent } from '@/components/user-menu-content';
 
 export default function CentralLayout({ children }: { children: ReactNode }) {
     const { auth } = usePage().props;

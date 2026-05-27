@@ -1,3 +1,5 @@
+import { useForm } from '@inertiajs/react';
+import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -5,8 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTenant } from '@/hooks/use-tenant';
 import type { Group } from '@/types';
-import { useForm } from '@inertiajs/react';
-import type { FormEvent } from 'react';
 
 type GroupFormData = {
     name: string;

@@ -1,7 +1,7 @@
-import { StudentForm } from '@/components/student-form';
-import TenantLayout from '@/layouts/tenant-layout';
 import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { StudentForm } from '@/components/student-form';
+import TenantLayout from '@/layouts/tenant-layout';
 
 export default function StudentsCreate() {
     return (

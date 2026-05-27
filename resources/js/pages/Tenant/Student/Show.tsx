@@ -1,19 +1,19 @@
+import { Head, Link } from '@inertiajs/react';
+import { format, parse } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { ArrowLeft, Pencil } from 'lucide-react';
+import type { ReactElement } from 'react';
 import { PageHeader } from '@/components/page-header';
 import StudentGroupsCard from '@/components/student-groups-card';
 import StudentPaymentsTab from '@/components/student-payments-tab';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import TenantLayout from '@/layouts/tenant-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTenant } from '@/hooks/use-tenant';
+import TenantLayout from '@/layouts/tenant-layout';
 import { statusLabel, statusVariant } from '@/lib/student-status';
 import type { Group, PaymentData, Student } from '@/types';
-import { useTenant } from '@/hooks/use-tenant';
-import { Head, Link } from '@inertiajs/react';
-import { format, parse } from 'date-fns';
-import { it } from 'date-fns/locale';
-import { ArrowLeft, Pencil } from 'lucide-react';
-import type { ReactElement } from 'react';
 
 function formatDate(value: string | null): string | null {
     if (!value) return null;

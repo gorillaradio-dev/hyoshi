@@ -1,3 +1,6 @@
+import { useForm } from '@inertiajs/react';
+import { Phone, Plus, Trash2, Users } from 'lucide-react';
+import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -7,14 +10,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { Student } from '@/types';
 import { useTenant } from '@/hooks/use-tenant';
-import { useForm } from '@inertiajs/react';
-import { Phone, Plus, Trash2, Users } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { Student } from '@/types';
 
 type EmergencyContactFormData = {
     name: string;

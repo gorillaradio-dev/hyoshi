@@ -1,12 +1,12 @@
+import { Head, router } from '@inertiajs/react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
+import type { ReactElement } from 'react';
 import { GroupForm } from '@/components/group-form';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
 import type { Group } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import { ArrowLeft, Trash2 } from 'lucide-react';
-import type { ReactElement } from 'react';
 
 type Props = {
     group: Group;

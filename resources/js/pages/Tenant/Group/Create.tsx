@@ -1,10 +1,10 @@
+import { Head } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { GroupForm } from '@/components/group-form';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import TenantLayout from '@/layouts/tenant-layout';
-import { Head } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 export default function GroupCreate() {
 

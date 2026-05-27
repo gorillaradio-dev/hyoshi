@@ -1,3 +1,8 @@
+import { useForm } from '@inertiajs/react';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+import { AlertTriangle } from 'lucide-react';
+import { useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,11 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTenant } from '@/hooks/use-tenant';
 import type { LatestEnrollment } from '@/types';
-import { useForm } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { it } from 'date-fns/locale';
-import { AlertTriangle } from 'lucide-react';
-import { useEffect } from 'react';
 
 type Props = {
     open: boolean;

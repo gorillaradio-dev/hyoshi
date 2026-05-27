@@ -1,4 +1,8 @@
+import { Head, router } from '@inertiajs/react';
+import { Pause, Play, Trash2 } from 'lucide-react';
+import type { ReactElement } from 'react';
 import { PageHeader } from '@/components/page-header';
+import { StudentForm } from '@/components/student-form';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,13 +16,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StudentForm } from '@/components/student-form';
+import { useTenant } from '@/hooks/use-tenant';
 import TenantLayout from '@/layouts/tenant-layout';
 import type { Student } from '@/types';
-import { useTenant } from '@/hooks/use-tenant';
-import { Head, router } from '@inertiajs/react';
-import { Pause, Play, Trash2 } from 'lucide-react';
-import type { ReactElement } from 'react';
 
 type Props = {
     student: Student;
