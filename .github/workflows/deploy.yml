@@ -2,12 +2,12 @@ name: Deploy Hyoshi
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   deploy-staging:
-    if: github.ref_name == 'staging'
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,7 @@ jobs:
             cd /var/www/hyoshi-staging
             git remote set-url origin git@github-hyoshi:gorillaradio-dev/hyoshi.git
             rm -rf public/storage
-            git pull origin staging
+            git pull origin main
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
             php artisan optimize:clear

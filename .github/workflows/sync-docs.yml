@@ -11,12 +11,12 @@ name: Sync docs to central portal
 # Prerequisite: a repo secret DOCS_SYNC_TOKEN — a fine-grained PAT with
 # Contents:Write scoped ONLY to the central repo.
 #
-# NOTE: trigger su `staging` (non `main`) perché in questo repo staging è
-# il branch attivo dove confluisce il lavoro e gira il deploy.
+# Trigger su `main`: è il branch attivo dove confluisce il lavoro e da cui
+# parte il deploy all'ambiente di staging.
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
     paths:
       - 'docs/html/**'
   workflow_dispatch:
