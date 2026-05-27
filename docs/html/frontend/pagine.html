@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagine principali · TrainerHub</title>
+<meta name="description" content="Tour delle pagine: Student/Index/Show, Group/Show, Dashboard. Pattern ricorrenti.">
+<meta name="doc-title" content="Pagine principali">
+<meta name="doc-section" content="Frontend">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Frontend</span><span class="sep">/</span>
+        <span>Pagine principali</span>
+      </div>
+
+      <h1>Pagine principali</h1>
+
+      <p>
+        Le pagine React di TrainerHub vivono in <code>resources/js/pages/</code> e mappano 1-a-1
+        con i controller backend. Questa pagina è un <strong>tour ragionato</strong>: per ciascuna
+        sezione, le pagine che la compongono e i pattern che vedrai più spesso (filtri persistiti,
+        debounce search, tab, modal di azione).
+      </p>
+
+      <h2 id="organizzazione">Organizzazione</h2>
+      <pre><code>resources/js/pages/
+├── Welcome.tsx                 — landing page pubblica
+├── Auth/                       — login, register, password reset (Fortify)
+├── Settings/                   — profilo, password, 2FA, appearance
+├── Central/
+│   └── Onboarding/Create.tsx   — creazione del primo tenant
+└── Tenant/                     — tutto sotto /app/{slug}/
+    ├── Dashboard/Index.tsx
+    ├── Student/
+    │   ├── Index.tsx           — elenco con filtri, pagamento rapido
+    │   ├── Show.tsx            — dettaglio con tab
+    │   ├── Create.tsx          — form nuovo
+    │   └── Edit.tsx            — form modifica
+    └── Group/
+        ├── Index.tsx
+        ├── Show.tsx            — dettaglio + membri
+        ├── Create.tsx
+        └── Edit.tsx</code></pre>
+
+      <p>
+        Convenzione di naming: directory <strong>PascalCase singolare</strong>
+        (<code>Student/</code>, non <code>Students/</code>), file <strong>PascalCase</strong>
+        (<code>Index.tsx</code>, <code>Show.tsx</code>, <code>Create.tsx</code>, <code>Edit.tsx</code>).
+      </p>
+
+      <h2 id="dashboard">Dashboard (<code>Tenant/Dashboard/Index.tsx</code>)</h2>
+      <p>
+        Vista riepilogo del tenant: KPI principali, allievi in stato di attenzione (quote scoperte,
+        iscrizione in scadenza), shortcut alle azioni più frequenti. È la prima pagina che vede
+        il trainer dopo il login.
+      </p>
+
+      <h2 id="student-index">Elenco allievi (<code>Tenant/Student/Index.tsx</code>)</h2>
+      <p>
+        La pagina più usata: tabella allievi con filtro per stato
+        (<code>active</code>/<code>pending</code>/<code>suspended</code>/<code>all</code>),
+        ricerca testuale, conteggio quote scoperte per riga, e azione "pagamento rapido" che apre
+        un dialog senza navigare via.
+      </p>
+      <ul>
+        <li><strong>Filtri persistiti via URL</strong> — i parametri <code>?search=...&amp;status=...</code>
+          sono nel querystring; refresh o copy-paste conservano lo stato.</li>
+        <li><strong>Quote scoperte indicate visivamente</strong> — un badge rosso accanto al nome
+          quando <code>uncovered_count &gt; 0</code> (dato calcolato batch lato server).</li>
+        <li><strong>Pagamento rapido</strong> — vedi <code>register-monthly-dialog.tsx</code>:
+          aperto dalla riga, registra un pagamento mensile senza lasciare la pagina.</li>
+      </ul>
+
+      <h2 id="student-show">Dettaglio allievo (<code>Tenant/Student/Show.tsx</code>)</h2>
+      <p>
+        Pagina ricca, organizzata in tab (shadcn <code>Tabs</code>):
+      </p>
+      <table>
+        <thead><tr><th>Tab</th><th>Contenuto</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Anagrafica</strong></td><td>Dati personali, contatti, codice fiscale, indirizzo.</td></tr>
+          <tr><td><strong>Gruppi</strong></td><td><code>student-groups-card.tsx</code>: attach/detach gruppi, designazione gruppo primario.</td></tr>
+          <tr><td><strong>Pagamenti</strong></td><td><code>student-payments-tab.tsx</code>: storico pagamenti mensili + iscrizioni, saldo, registra nuovo pagamento.</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Azioni principali: <em>Modifica</em> (→ <code>Edit.tsx</code>), <em>Sospendi</em>
+        (<code>PUT /suspend</code>), <em>Registra iscrizione</em> (dialog), <em>Registra pagamento
+        mensile</em> (dialog).
+      </p>
+
+      <h2 id="student-form">Form allievo (<code>Tenant/Student/{Create,Edit}.tsx</code>)</h2>
+      <p>
+        Entrambe le pagine usano <code>resources/js/components/student-form.tsx</code> condiviso.
+        Pattern notabili:
+      </p>
+      <ul>
+        <li><strong>Contatti d'emergenza dinamici</strong> — array di righe con
+          <code>useFieldArray</code>-style: aggiungi/rimuovi righe, designi un contatto come
+          "telefono principale" via <code>phone_contact_index</code>.</li>
+        <li><strong>Override quota</strong> — campo numerico in <em>euro</em> lato UI; la
+          conversione a centesimi avviene in <code>StoreStudentRequest::prepareForValidation()</code>
+          (vedi <a data-href="http/controller.html">Controller &amp; FormRequest</a>).</li>
+        <li><strong>Validazione lato server</strong> — gli errori arrivano da
+          <code>form.errors</code> di Inertia; visualizzati con <code>input-error.tsx</code>.</li>
+      </ul>
+
+      <h2 id="group-show">Gruppi (<code>Tenant/Group/Show.tsx</code>)</h2>
+      <p>
+        Dettaglio gruppo con elenco membri. Pattern interessante: <strong>ricerca debounced</strong>
+        per aggiungere studenti, evitando di hammerare il server a ogni keypress (usa il sub-endpoint
+        <code>tenant.students.search</code> che ritorna JSON).
+      </p>
+
+      <h2 id="patterns">Pattern ricorrenti</h2>
+
+      <h3 id="useForm">Form con <code>useForm</code></h3>
+      <pre><code>const form = useForm({
+    first_name: '',
+    last_name: '',
+    email: '',
+});
+
+form.post('/app/' + tenant.slug + '/students', {
+    onSuccess: () =&gt; form.reset(),
+    preserveScroll: true,
+});</code></pre>
+      <p>
+        <code>preserveScroll: true</code> è utile quando il form sta in fondo a una pagina lunga e
+        un errore di validazione farebbe scrollare via.
+      </p>
+
+      <h3 id="dialog">Dialog di azione</h3>
+      <p>
+        Pattern shadcn <code>Dialog</code>: il bottone trigger sta nella riga della tabella o
+        nell'header pagina, il <code>DialogContent</code> è un <code>useForm</code> per l'azione
+        (es. <code>register-monthly-dialog.tsx</code>). Submit ottimistico: chiudere il dialog
+        in <code>onSuccess</code>, mostrare flash via <code>toast</code>.
+      </p>
+
+      <h3 id="page-header">Header pagina riutilizzabile</h3>
+      <p>
+        <code>resources/js/components/page-header.tsx</code> mette title, descrizione, back button
+        e action slot in modo consistente. Usalo invece di rifare l'header in ogni pagina.
+      </p>
+
+      <h3 id="empty-state">Empty state</h3>
+      <p>
+        Quando una collection è vuota (es. nessuno studente, nessun pagamento), mostra una empty
+        state con copy chiaro e azione primaria (es. "Aggiungi il primo allievo"). Non lasciare
+        tabelle vuote.
+      </p>
+
+      <h3 id="loading">Stato di caricamento</h3>
+      <p>
+        Inertia gestisce il progress bar globale (vedi <code>app.tsx</code>: <code>progress: { color: '#1B7A3D' }</code>).
+        Per azioni puntuali, usa <code>form.processing</code> per disabilitare i bottoni durante
+        la submit.
+      </p>
+
+      <h2 id="dove-aggiungo">"Dove aggiungo una nuova pagina?"</h2>
+      <ol>
+        <li>Decidi se è <strong>tenant</strong> o <strong>central</strong> (vedi
+          <a data-href="http/routing.html">Routing</a>).</li>
+        <li>Crea il file in <code>resources/js/pages/Tenant/&lt;Resource&gt;/&lt;Action&gt;.tsx</code>.</li>
+        <li>Esporta default + assegna il layout: <code>Page.layout = (p) =&gt; &lt;TenantLayout&gt;{p}&lt;/TenantLayout&gt;</code>.</li>
+        <li>Dal controller, <code>return Inertia::render('Tenant/&lt;Resource&gt;/&lt;Action&gt;', $props)</code>.</li>
+        <li>Aggiungi la route in <code>routes/tenant.php</code> con il middleware giusto.</li>
+        <li>Aggiungi una entry nella sidebar (<code>resources/js/components/tenant-sidebar.tsx</code>)
+          se è una pagina principale, oppure raggiungibile da link interno se è secondaria.</li>
+      </ol>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

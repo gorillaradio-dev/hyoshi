@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout & navigazione mobile · TrainerHub</title>
+<meta name="description" content="TenantLayout, CentralLayout, sidebar desktop vs bottom-nav mobile. Pattern responsive.">
+<meta name="doc-title" content="Layout & navigazione mobile">
+<meta name="doc-section" content="Frontend">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Frontend</span><span class="sep">/</span>
+        <span>Layout & navigazione mobile</span>
+      </div>
+
+      <h1>Layout & navigazione mobile</h1>
+
+      <p>
+        Il trainer usa TrainerHub <strong>spesso dal telefono</strong>: dal bordo campo, in
+        palestra, mentre registra un pagamento al volo. Per questo l'UI è <strong>mobile-first</strong>
+        — non "responsive che funzionicchia anche su mobile", ma progettata prima per il
+        telefono e poi adattata al desktop. La differenza si vede nei layout.
+      </p>
+
+      <h2 id="layout-disponibili">I layout</h2>
+      <table>
+        <thead><tr><th>Layout</th><th>Quando</th></tr></thead>
+        <tbody>
+          <tr><td><code>TenantLayout</code></td><td>Tutte le pagine sotto <code>/app/{slug}/</code></td></tr>
+          <tr><td><code>CentralLayout</code></td><td>Onboarding, billing, pagine "non ancora in un tenant"</td></tr>
+          <tr><td><code>AuthLayout</code></td><td>Login, register, password reset, 2FA</td></tr>
+          <tr><td><code>SettingsLayout</code></td><td>Profilo, password, appearance, 2FA setup</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Vivono in <code>resources/js/layouts/</code>. Si assegnano alla pagina con il
+        <strong>persistent layout pattern</strong> di Inertia:
+      </p>
+
+      <pre><code>// resources/js/pages/Tenant/Student/Show.tsx
+import TenantLayout from '@/layouts/tenant-layout';
+import type { ReactElement } from 'react';
+
+export default function StudentShow(props: Props) {
+    // ...
+}
+
+StudentShow.layout = (page: ReactElement) =&gt; &lt;TenantLayout&gt;{page}&lt;/TenantLayout&gt;;</code></pre>
+
+      <p>
+        Il vantaggio del persistent layout: navigando tra pagine che condividono lo stesso layout,
+        il chrome (sidebar, header) <strong>non si smonta</strong> — lo state interno
+        (es. scroll della sidebar, menu aperto) rimane.
+      </p>
+
+      <h2 id="tenant-layout"><code>TenantLayout</code> nel dettaglio</h2>
+      <p>
+        File: <code>resources/js/layouts/tenant-layout.tsx</code>. Il layout decide al runtime se
+        renderizzare la versione <strong>mobile</strong> o <strong>desktop</strong> in base
+        all'hook <code>useIsMobile()</code>.
+      </p>
+
+      <pre><code>export default function TenantLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
+    const isMobile = useIsMobile();
+    const tenant = useTenant();
+    const prefix = `/app/${tenant.slug}`;
+
+    // Risolve breadcrumb relativi al prefix tenant
+    const resolvedBreadcrumbs = breadcrumbs.map((item) =&gt; ({
+        ...item,
+        href: typeof item.href === 'string' && !item.href.startsWith('/') && item.href !== '#'
+            ? `${prefix}/${item.href}`
+            : item.href,
+    }));
+
+    if (isMobile) {
+        return (
+            &lt;div className="flex min-h-svh flex-col bg-background"&gt;
+                &lt;TenantMobileHeader /&gt;
+                &lt;main className="flex flex-1 flex-col pb-16"&gt;{children}&lt;/main&gt;
+                &lt;TenantBottomNav /&gt;
+            &lt;/div&gt;
+        );
+    }
+
+    return (
+        &lt;AppShell variant="sidebar"&gt;
+            &lt;TenantSidebar /&gt;
+            &lt;AppContent variant="sidebar" className="overflow-x-hidden"&gt;
+                &lt;AppSidebarHeader breadcrumbs={resolvedBreadcrumbs} /&gt;
+                {children}
+            &lt;/AppContent&gt;
+        &lt;/AppShell&gt;
+    );
+}</code></pre>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>L'hook <code>useIsMobile()</code> in <code>resources/js/hooks/use-mobile.ts</code>
+          legge un media query breakpoint. La scelta tra mobile/desktop avviene <em>al primo
+          render</em> e si aggiorna al resize.</p></div>
+      </div>
+
+      <h2 id="mobile">Chrome mobile</h2>
+      <p>Due componenti compongono il chrome mobile:</p>
+      <ul>
+        <li>
+          <strong><code>TenantMobileHeader</code></strong>
+          (<code>resources/js/components/tenant-mobile-header.tsx</code>) — header sticky in alto
+          con logo, nome tenant, menu utente. Compatto, alto solo lo stretto necessario.
+        </li>
+        <li>
+          <strong><code>TenantBottomNav</code></strong>
+          (<code>resources/js/components/tenant-bottom-nav.tsx</code>) — bottom nav fissa con le 3-4
+          sezioni principali (Dashboard, Allievi, Gruppi, …). Pattern iOS/Android nativo. Pulsante
+          centrale o destro per l'azione primaria.
+        </li>
+      </ul>
+      <p>
+        Il <code>pb-16</code> sul <code>&lt;main&gt;</code> riserva lo spazio per la bottom nav
+        in modo che il contenuto non vada sotto.
+      </p>
+
+      <h2 id="desktop">Chrome desktop</h2>
+      <ul>
+        <li>
+          <strong><code>AppShell</code></strong> + <strong><code>TenantSidebar</code></strong> —
+          sidebar laterale fissa con navigazione completa, raggruppata per sezione.
+          Apertura/chiusura persistita via cookie (<code>sidebar_state</code> è una shared prop
+          Inertia).
+        </li>
+        <li>
+          <strong><code>AppSidebarHeader</code></strong> — header con breadcrumb risolti
+          tenant-aware. Il layout normalizza i breadcrumb relativi nel prefix
+          <code>/app/{slug}/</code>.
+        </li>
+        <li>
+          <strong><code>AppContent</code></strong> — area scrollabile principale.
+        </li>
+      </ul>
+
+      <h2 id="central">CentralLayout</h2>
+      <p>
+        File: <code>resources/js/layouts/central-layout.tsx</code>. Layout più semplice per pagine
+        non-tenant: niente sidebar, header minimale con logo e profilo. Usato per onboarding e
+        future pagine di billing.
+      </p>
+
+      <h2 id="responsive">Filosofia "responsive"</h2>
+      <ul>
+        <li>
+          <strong>Mobile è il default</strong>: scrivi prima la versione mobile, poi aggiungi
+          modificatori <code>md:</code>/<code>lg:</code> Tailwind per il desktop.
+        </li>
+        <li>
+          <strong>Touch target ≥ 44px</strong>: bottoni e link cliccabili devono essere comodi col
+          dito. shadcn <code>Button</code> con dimensione default rispetta questo.
+        </li>
+        <li>
+          <strong>Niente hover-only</strong>: ogni azione raggiungibile via hover su desktop deve
+          avere un fallback tap-friendly su mobile (long press, menu kebab, ecc.).
+        </li>
+        <li>
+          <strong>Test mobile reale</strong>: <code>docs/mobile-testing.md</code> spiega come
+          esporre il dev server in LAN e testare dal telefono.
+        </li>
+      </ul>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Prima di committare una nuova pagina, aprila sul tuo telefono. Se non è comoda da
+          usare in piedi con una mano, va ripensata — non semplicemente "lasciamola così, tanto
+          funziona".</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

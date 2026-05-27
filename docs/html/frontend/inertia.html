@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architettura Inertia · TrainerHub</title>
+<meta name="description" content="Come Inertia monta le pagine, resolvePageComponent, shared props, navigazione SPA senza API.">
+<meta name="doc-title" content="Architettura Inertia">
+<meta name="doc-section" content="Frontend">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Frontend</span><span class="sep">/</span>
+        <span>Architettura Inertia</span>
+      </div>
+
+      <h1>Architettura Inertia</h1>
+
+      <p>
+        Inertia.js è il ponte tra Laravel e React in TrainerHub. <strong>Non c'è un'API REST</strong>
+        separata: il backend risponde con il nome di un componente React e le sue props; il
+        frontend lo monta come pagina. Risultato: ergonomia di una SPA (navigazione client-side,
+        no full reload) con la semplicità di un'app server-rendered (zero gestione di token,
+        validazione lato server, redirect HTTP).
+      </p>
+
+      <h2 id="modello-mentale">Il modello mentale</h2>
+      <p>
+        Pensala così: ogni rotta Laravel è una "pagina". Il controller decide quale componente
+        React renderizzare e con quali props. Il browser fa il primo render server-side, le
+        navigazioni successive sono XHR Inertia che ricevono solo il payload props.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Flusso Inertia</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+sequenceDiagram
+  participant B as Browser
+  participant L as Laravel
+  participant I as Inertia middleware
+  participant R as React
+  B->>L: GET /app/{slug}/students/{id}
+  L->>I: Inertia::render('Tenant/Student/Show', props)
+  I->>B: HTML root + JSON payload (first load)
+  Note over B: createInertiaApp().setup() monta React
+  B->>R: resolvePageComponent('Tenant/Student/Show')
+  R->>B: Pagina renderizzata
+  B->>L: Link.click() / form submit (navigazione successiva)
+  L->>I: render(...)
+  I->>B: JSON payload (no full reload)
+  B->>R: monta la nuova pagina
+</pre>
+        </div>
+      </div>
+
+      <h2 id="entry">Entry point: <code>app.tsx</code></h2>
+      <p>
+        File: <code>resources/js/app.tsx</code>. Inertia si avvia con
+        <code>createInertiaApp</code>: il resolver mappa il nome del componente al file
+        <code>.tsx</code> corrispondente in <code>resources/js/pages/</code>.
+      </p>
+
+      <pre><code>createInertiaApp({
+    title: (title) =&gt; (title ? `${title} - ${appName}` : appName),
+    resolve: (name) =&gt;
+        resolvePageComponent(
+            `./pages/${name}.tsx`,
+            import.meta.glob('./pages/**/*.tsx'),
+        ),
+    setup({ el, App, props }) {
+        const root = createRoot(el);
+        root.render(
+            &lt;StrictMode&gt;
+                &lt;App {...props} /&gt;
+            &lt;/StrictMode&gt;,
+        );
+    },
+    progress: { color: '#1B7A3D' },
+});</code></pre>
+
+      <p>
+        <code>import.meta.glob</code> è una feature di Vite: codifica al build-time il mapping
+        nome→file, così il resolver è statico e tree-shakable.
+      </p>
+
+      <h2 id="render">Lato backend: <code>Inertia::render</code></h2>
+      <pre><code>// Da app/Http/Controllers/Tenant/StudentController.php
+return Inertia::render('Tenant/Student/Show', [
+    'student'  =&gt; $student,
+    'groups'   =&gt; Group::all(),
+    'payments' =&gt; $paymentData,
+]);</code></pre>
+      <p>
+        Il primo argomento è il nome relativo a <code>resources/js/pages/</code> senza estensione.
+        Il secondo è il payload di props (Eloquent → JSON automaticamente).
+      </p>
+
+      <h2 id="shared">Shared props</h2>
+      <p>
+        Il middleware <code>HandleInertiaRequests::share()</code> condivide dati con ogni pagina,
+        senza doverli passare esplicitamente dai controller.
+      </p>
+
+      <pre><code>// app/Http/Middleware/HandleInertiaRequests.php
+public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'name' =&gt; config('app.name'),
+        'auth' =&gt; ['user' =&gt; $request-&gt;user()],
+        'sidebarOpen' =&gt; ! $request-&gt;hasCookie('sidebar_state')
+            || $request-&gt;cookie('sidebar_state') === 'true',
+        'tenant' =&gt; fn () =&gt; tenant() ? [
+            'id'   =&gt; tenant('id'),
+            'name' =&gt; tenant('name'),
+            'slug' =&gt; tenant('slug'),
+        ] : null,
+    ];
+}</code></pre>
+
+      <p>Cosa è disponibile su <em>ogni</em> pagina via <code>usePage().props</code>:</p>
+      <table>
+        <thead><tr><th>Prop</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>auth.user</code></td><td>User o null</td><td>L'utente loggato.</td></tr>
+          <tr><td><code>tenant</code></td><td>SharedTenant o null</td><td>Il tenant corrente (id/name/slug). Null sulle route centrali.</td></tr>
+          <tr><td><code>sidebarOpen</code></td><td>boolean</td><td>Stato persistito nei cookie.</td></tr>
+          <tr><td><code>name</code></td><td>string</td><td>Nome dell'app.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="hook-tenant">Accesso al tenant: <code>useTenant()</code></h2>
+      <p>
+        Per leggere il tenant da un componente <strong>dentro una route tenant</strong>, usa
+        l'hook <code>useTenant()</code>. È un wrapper attorno a <code>usePage().props.tenant</code>
+        che lancia un errore se il tenant non c'è (== sei in una route central per sbaglio).
+      </p>
+
+      <pre><code>// resources/js/hooks/use-tenant.ts
+export function useTenant(): SharedTenant {
+    const { tenant } = usePage().props;
+
+    if (!tenant) {
+        throw new Error('useTenant() must be used inside a tenant route.');
+    }
+
+    return tenant;
+}</code></pre>
+
+      <p>Uso tipico:</p>
+      <pre><code>const tenant = useTenant();
+const studentsUrl = `/app/${tenant.slug}/students`;</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Costruire URL a mano è scomodo e fragile. Meglio: usare i route helper generati da
+          <strong>Laravel Wayfinder</strong> in <code>resources/js/routes/</code> — sono tipizzati
+          e ricevono il tenant come parametro.</p></div>
+      </div>
+
+      <h2 id="form">Form: <code>useForm</code></h2>
+      <p>
+        Inertia React ha il proprio hook <code>useForm</code> che integra stato del form,
+        submission, errori di validazione e progress. <strong>Usa sempre quello</strong>, mai
+        <code>useState</code> manuale + fetch.
+      </p>
+
+      <pre><code>import { useForm } from '@inertiajs/react';
+
+const form = useForm({
+    first_name: '',
+    last_name: '',
+    email: '',
+});
+
+function submit(e: FormEvent) {
+    e.preventDefault();
+    form.post('/app/' + tenant.slug + '/students', {
+        onSuccess: () =&gt; form.reset(),
+    });
+}
+
+// form.errors.first_name → messaggio di validazione dal backend
+// form.processing → true durante la submit
+// form.data → stato corrente
+// form.setData('first_name', value)</code></pre>
+
+      <h2 id="layout">Layout persistenti</h2>
+      <p>
+        Inertia supporta layout che <strong>non si smontano</strong> tra navigazioni nella stessa
+        sezione (mantenendo state, scroll, focus). Ogni pagina dichiara il suo layout:
+      </p>
+
+      <pre><code>// resources/js/pages/Tenant/Student/Show.tsx
+import TenantLayout from '@/layouts/tenant-layout';
+
+export default function StudentShow(props: Props) {
+    // ...
+}
+
+StudentShow.layout = (page: ReactElement) =&gt; &lt;TenantLayout&gt;{page}&lt;/TenantLayout&gt;;</code></pre>
+
+      <p>
+        Vedi <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a> per
+        <code>TenantLayout</code> nel dettaglio.
+      </p>
+
+      <h2 id="ssr">Server-Side Rendering</h2>
+      <p>
+        L'entry SSR è <code>resources/js/ssr.tsx</code>. Il comando <code>npm run build:ssr</code>
+        produce il bundle SSR. Non attivo in deploy attuale, ma il file esiste per quando servirà.
+      </p>
+
+      <h2 id="risorse">Risorse esterne</h2>
+      <ul>
+        <li><a href="https://inertiajs.com/">inertiajs.com</a> — documentazione ufficiale.</li>
+        <li><a href="https://inertiajs.com/the-protocol">Protocollo Inertia</a> — utile quando
+          serve capire <em>perché</em> succede qualcosa di strano in rete.</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

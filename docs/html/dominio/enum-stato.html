@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enum di stato e tipo · TrainerHub</title>
+<meta name="description" content="StudentStatus, PaymentMethod, DocumentType, DocumentStatus: dominio auto-documentante.">
+<meta name="doc-title" content="Enum di stato e tipo">
+<meta name="doc-section" content="Dominio">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Dominio</span><span class="sep">/</span>
+        <span>Enum di stato e tipo</span>
+      </div>
+
+      <h1>Enum di stato e tipo</h1>
+
+      <p>
+        Tutti i valori a dominio chiuso del progetto sono espressi come <strong>backed enum</strong>
+        PHP 8.1. Vivono in <code>app/Enums/</code>, sono persistiti come stringhe, e sono usati
+        come <code>cast</code> sui modelli Eloquent. Questo sposta la validazione dei valori
+        ammessi sul sistema dei tipi: <em>stati non validi diventano impossibili a livello di
+        compilazione</em>.
+      </p>
+
+      <h2 id="perche">Perché backed enum</h2>
+      <ul>
+        <li><strong>Auto-documentazione.</strong> L'enum elenca tutti i casi possibili: leggere
+          la classe è più chiaro che cercare gli <code>where('status', '...')</code> sparsi nel codice.</li>
+        <li><strong>Refactoring sicuro.</strong> Rinominare un caso è un cambio nominale: il
+          compilatore segnala ogni uso non aggiornato.</li>
+        <li><strong>Match exhaustive.</strong> Con <code>match()</code> il linter rileva i casi
+          non gestiti.</li>
+        <li><strong>Sicurezza ai bordi.</strong> Un valore arbitrario dal DB o da una request che
+          non è uno dei casi → eccezione, non valore "fantasma".</li>
+      </ul>
+
+      <h2 id="student-status"><code>StudentStatus</code></h2>
+      <p>File: <code>app/Enums/StudentStatus.php</code>.</p>
+      <pre><code>enum StudentStatus: string
+{
+    case Pending = 'pending';
+    case Active = 'active';
+    case Suspended = 'suspended';
+}</code></pre>
+
+      <table>
+        <thead><tr><th>Caso</th><th>Valore</th><th>Significato</th></tr></thead>
+        <tbody>
+          <tr><td><code>Pending</code></td><td><code>pending</code></td><td>Studente senza iscrizione valida (mai iscritto o iscrizione scaduta). <strong>Calcolato</strong>.</td></tr>
+          <tr><td><code>Active</code></td><td><code>active</code></td><td>Studente con iscrizione valida e non sospeso. <strong>Calcolato</strong>.</td></tr>
+          <tr><td><code>Suspended</code></td><td><code>suspended</code></td><td>Sospeso manualmente dal trainer. <strong>Persistito</strong> su <code>students.status</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Lo stato esposto dall'API è <code>student-&gt;effective_status</code>, non
+          <code>student-&gt;status</code>. Vedi <a data-href="dominio/studenti-gruppi.html#effective-status">Studenti
+          e gruppi · stato effettivo</a> per la regola di calcolo.</p></div>
+      </div>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Stati dello studente</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Pending: creato senza iscrizione valida
+  Pending --> Active: registra iscrizione valida
+  Active --> Pending: iscrizione scaduta
+  Pending --> Suspended: PUT /suspend
+  Active --> Suspended: PUT /suspend
+  Suspended --> Pending: PUT /reactivate
+</pre>
+        </div>
+      </div>
+
+      <h2 id="payment-method"><code>PaymentMethod</code></h2>
+      <p>File: <code>app/Enums/PaymentMethod.php</code>.</p>
+      <pre><code>enum PaymentMethod: string
+{
+    case Cash = 'cash';
+}</code></pre>
+      <p>
+        Per ora c'è solo <code>Cash</code>. È un enum (anziché una colonna libera) per facilitare
+        l'aggiunta futura di <code>Transfer</code>, <code>Card</code>, <code>Online</code> (Stripe
+        Connect) senza riscrivere i call site.
+      </p>
+
+      <h2 id="document-type"><code>DocumentType</code></h2>
+      <p>File: <code>app/Enums/DocumentType.php</code>.</p>
+      <pre><code>enum DocumentType: string
+{
+    case MedicalCertificate = 'medical_certificate';
+    case IdentityDoc = 'identity_doc';
+    case PrivacyConsent = 'privacy_consent';
+    case Other = 'other';
+}</code></pre>
+      <p>
+        Tipologia del documento dell'allievo. <code>MedicalCertificate</code> è il caso che ha
+        <code>expires_at</code> obbligatorio (gli altri sono opzionali).
+      </p>
+
+      <h2 id="document-status"><code>DocumentStatus</code></h2>
+      <p>File: <code>app/Enums/DocumentStatus.php</code>.</p>
+      <pre><code>enum DocumentStatus: string
+{
+    case Pending = 'pending';
+    case Delivered = 'delivered';
+    case Expired = 'expired';
+    case ExpiringSoon = 'expiring_soon';
+}</code></pre>
+      <p>
+        Stato del documento. <code>ExpiringSoon</code> è l'alert per certificati medici che
+        scadono nei prossimi 30 giorni.
+      </p>
+
+      <h2 id="convenzioni">Convenzioni di codifica</h2>
+      <ul>
+        <li><strong>Naming:</strong> il caso è <code>PascalCase</code>; il valore persistito è
+          <code>snake_case</code>. Convenzione consolidata in tutto il progetto.</li>
+        <li><strong>Cast nei modelli:</strong>
+          <code>'status' =&gt; StudentStatus::class</code> nella <code>$casts</code> array.</li>
+        <li><strong>Niente magic strings nelle FormRequest:</strong> usare
+          <code>'in:'.implode(',', array_column(StudentStatus::cases(), 'value'))</code> o
+          <code>Rule::enum(StudentStatus::class)</code>.</li>
+        <li><strong>Niente magic strings nei test:</strong> sempre <code>StudentStatus::Active-&gt;value</code>
+          (mai <code>'active'</code> letterale).</li>
+      </ul>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Quando aggiungi un nuovo caso a un enum esistente, cerca tutti i
+          <code>match($x) { ... }</code> nel codice: PHP non garantisce exhaustiveness a runtime,
+          ma il <em>tuo PR</em> dovrebbe coprire tutti i siti d'uso esistenti.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

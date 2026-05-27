@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controller & FormRequest · TrainerHub</title>
+<meta name="description" content="Controller thin, validazione in FormRequest, delega ai service. Esempi reali dal codice.">
+<meta name="doc-title" content="Controller & FormRequest">
+<meta name="doc-section" content="HTTP">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>HTTP</span><span class="sep">/</span>
+        <span>Controller & FormRequest</span>
+      </div>
+
+      <h1>Controller & FormRequest</h1>
+
+      <p>
+        I controller in TrainerHub sono <strong>thin</strong>: ricevono la richiesta validata,
+        invocano la Policy, delegano il lavoro a un service, e restituiscono una pagina Inertia.
+        Niente business logic dentro il controller. Niente query Eloquent complesse. Niente
+        validazione inline.
+      </p>
+
+      <h2 id="responsabilita">Divisione delle responsabilità</h2>
+      <table>
+        <thead><tr><th>Cosa</th><th>Dove vive</th></tr></thead>
+        <tbody>
+          <tr><td>Validazione input</td><td><code>app/Http/Requests/Tenant/*Request.php</code> (FormRequest)</td></tr>
+          <tr><td>Authorization</td><td><code>app/Policies/*Policy.php</code> + chiamata <code>$this-&gt;authorize(...)</code></td></tr>
+          <tr><td>Business logic</td><td><code>app/Services/*Service.php</code></td></tr>
+          <tr><td>Persistenza</td><td><code>app/Models/</code> (Eloquent)</td></tr>
+          <tr><td>Routing / orchestrazione</td><td><code>app/Http/Controllers/</code> (qui dentro)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="esempio">Esempio canonico: <code>StudentController</code></h2>
+      <p>
+        Da <code>app/Http/Controllers/Tenant/StudentController.php</code>. Mostra il pattern
+        completo: <code>authorize</code> → query con filtri → response Inertia.
+      </p>
+
+      <pre><code>public function index(Request $request)
+{
+    $this-&gt;authorize('viewAny', Student::class);
+
+    $query = Student::with('phoneContact');
+
+    if ($search = $request-&gt;input('search')) {
+        $query-&gt;where(function ($q) use ($search) {
+            $q-&gt;where('first_name', 'like', "%{$search}%")
+              -&gt;orWhere('last_name', 'like', "%{$search}%")
+              -&gt;orWhere('email', 'like', "%{$search}%");
+        });
+    }
+
+    // ...filtri stato (active/pending/suspended/all)
+
+    $students = $query-&gt;orderBy('last_name')-&gt;paginate(20);
+
+    return Inertia::render('Tenant/Student/Index', [
+        'students' =&gt; $students,
+        'filters' =&gt; $request-&gt;only(['search', 'status']),
+    ]);
+}</code></pre>
+
+      <p>Note sul pattern:</p>
+      <ul>
+        <li><code>Student::with('phoneContact')</code> — eager loading per evitare N+1 in vista.</li>
+        <li>Il <strong>global scope tenant</strong> è già applicato: nessuna <code>where('tenant_id', ...)</code> a mano.</li>
+        <li>Il response è <code>Inertia::render('Pagina', props)</code> — niente JSON, niente Blade view.</li>
+      </ul>
+
+      <h2 id="formrequest">FormRequest: validazione dichiarativa</h2>
+      <p>
+        I controller ricevono FormRequest tipizzati. Tutta la validazione, normalizzazione e
+        autorizzazione di campo vive nella request, mai inline nel controller.
+      </p>
+
+      <pre><code>// app/Http/Requests/Tenant/StoreStudentRequest.php
+public function authorize(): bool
+{
+    return true; // autorizzazione gestita dal middleware tenant.access
+}
+
+public function rules(): array
+{
+    return [
+        'first_name' =&gt; ['required', 'string', 'max:255'],
+        'last_name'  =&gt; ['required', 'string', 'max:255'],
+        'email' =&gt; [
+            'nullable', 'email', 'max:255',
+            Rule::unique('students')-&gt;where('tenant_id', tenant()-&gt;getTenantKey()),
+        ],
+        'phone' =&gt; ['nullable', 'string', 'max:50'],
+        'date_of_birth' =&gt; ['nullable', 'date', 'before:today'],
+        'fiscal_code'   =&gt; ['nullable', 'string', 'max:16'],
+        'address' =&gt; ['nullable', 'string', 'max:500'],
+        'emergency_contacts'         =&gt; ['nullable', 'array', 'max:5'],
+        'emergency_contacts.*.name'  =&gt; ['required', 'string', 'max:255'],
+        'emergency_contacts.*.phone' =&gt; ['required', 'string', 'max:50'],
+        'phone_contact_index'        =&gt; ['nullable', 'integer'],
+        'notes' =&gt; ['nullable', 'string', 'max:5000'],
+        'enrolled_at' =&gt; ['nullable', 'date'],
+        'monthly_fee_override' =&gt; ['nullable', 'numeric', 'min:0'],
+    ];
+}
+
+protected function prepareForValidation(): void
+{
+    // Converte euro decimali (€50.00 dalla UI) in centesimi (5000) prima della validazione
+    if ($this-&gt;has('monthly_fee_override') && $this-&gt;monthly_fee_override !== null && $this-&gt;monthly_fee_override !== '') {
+        $this-&gt;merge([
+            'monthly_fee_override' =&gt; (int) round($this-&gt;monthly_fee_override * 100),
+        ]);
+    }
+}</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p><code>prepareForValidation()</code> è il punto giusto per <em>normalizzare</em> i
+          dati prima delle regole: trim, lowercase, conversione euro→centesimi, ecc. Non sporcare
+          le rules con cast logici.</p></div>
+      </div>
+
+      <h2 id="unique-tenant">Validazione unique tenant-aware</h2>
+      <p>
+        Le regole <code>unique</code> devono <strong>essere esplicitamente scoped al tenant</strong>,
+        perché Laravel non lo fa automaticamente:
+      </p>
+      <pre><code>Rule::unique('students')-&gt;where('tenant_id', tenant()-&gt;getTenantKey())</code></pre>
+      <p>
+        Senza il <code>where</code>, un'email duplicata in due tenant diversi farebbe fallire la
+        validazione anche se i tenant non si vedono. Errore comune che il global scope NON
+        previene perché agisce su Eloquent, non sul query builder usato da
+        <code>Rule::unique</code>.
+      </p>
+
+      <h2 id="patterns">Pattern ricorrenti</h2>
+
+      <h3 id="store">Store</h3>
+      <pre><code>public function store(StoreStudentRequest $request)
+{
+    $this-&gt;authorize('create', Student::class);
+
+    $student = Student::create($request-&gt;validated());
+    // ...gestione collegamenti opzionali (emergency contacts, gruppi)
+
+    return redirect()-&gt;route('tenant.students.show', [
+        'tenant'  =&gt; tenant()-&gt;slug,
+        'student' =&gt; $student-&gt;id,
+    ])-&gt;with('success', 'Allievo creato.');
+}</code></pre>
+
+      <h3 id="action-personalizzata">Azione personalizzata (sospendi)</h3>
+      <pre><code>public function suspend(Student $student)
+{
+    $this-&gt;authorize('update', $student);
+
+    // delega al modello o al service (qui semplice update)
+    $student-&gt;update(['status' =&gt; StudentStatus::Suspended]);
+
+    return back()-&gt;with('success', 'Allievo sospeso.');
+}</code></pre>
+
+      <h3 id="delega-service">Delega a service per logica monetaria</h3>
+      <pre><code>public function registerMonthly(
+    RegisterMonthlyPaymentRequest $request,
+    Student $student,
+    MonthlyFeeService $monthlyFeeService,
+) {
+    $this-&gt;authorize('update', $student);
+
+    $payment = $monthlyFeeService-&gt;registerPayment(
+        $student,
+        $request-&gt;integer('months'),
+        $request-&gt;integer('amount'),
+        $request-&gt;input('notes'),
+    );
+
+    return back()-&gt;with('success', "Pagamento registrato (€".number_format($payment-&gt;amount / 100, 2).").");
+}</code></pre>
+
+      <p>
+        Il controller fa una sola cosa: orchestra. Il calcolo dei periodi, la creazione delle
+        <code>MonthlyFee</code>, il rispetto del FIFO — tutto dentro <code>MonthlyFeeService</code>.
+      </p>
+
+      <h2 id="risorse">Risorse Inertia: pagine, non JSON</h2>
+      <p>
+        I controller non rispondono mai con JSON (tranne casi di endpoint dati per autocomplete,
+        es. <code>StudentController::search</code> che ritorna JSON nudo). Per le pagine la
+        response è sempre:
+      </p>
+      <pre><code>return Inertia::render('Tenant/Student/Show', [
+    'student'    =&gt; $student,
+    'groups'     =&gt; Group::all(),
+    'paymentData' =&gt; $paymentService-&gt;buildFor($student),
+]);</code></pre>
+      <p>
+        Il primo argomento è il nome del componente React in <code>resources/js/pages/</code>; il
+        secondo è il payload di props. Vedi <a data-href="frontend/inertia.html">Architettura
+        Inertia</a> per come il frontend riceve e monta.
+      </p>
+
+      <h2 id="checklist">Checklist per un nuovo controller tenant</h2>
+      <ul>
+        <li>Estende <code>App\Http\Controllers\Controller</code> (per <code>AuthorizesRequests</code>).</li>
+        <li>Ogni metodo chiama <code>$this-&gt;authorize(...)</code> con la Policy giusta.</li>
+        <li>Validazione in una FormRequest in <code>app/Http/Requests/Tenant/</code>.</li>
+        <li>Business logic in un service dedicato (mai inline).</li>
+        <li>Response Inertia con props tipizzate lato frontend (vedi <code>resources/js/types/</code>).</li>
+        <li>Feature test in <code>tests/Feature/Tenant/</code> che includa la verifica di isolamento.</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

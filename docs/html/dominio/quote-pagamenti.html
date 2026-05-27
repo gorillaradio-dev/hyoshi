@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote mensili e pagamenti · TrainerHub</title>
+<meta name="description" content="MonthlyFee, Payment, calcolo periodi scoperti, FIFO sui pagamenti, importi in centesimi.">
+<meta name="doc-title" content="Quote mensili e pagamenti">
+<meta name="doc-section" content="Dominio">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Dominio</span><span class="sep">/</span>
+        <span>Quote mensili e pagamenti</span>
+      </div>
+
+      <h1>Quote mensili e pagamenti</h1>
+
+      <p>
+        Il cuore del dominio è la gestione delle <strong>quote mensili</strong>: capire chi deve
+        cosa, registrare i pagamenti che le coprono, mantenere coerenza nel tempo. È la parte del
+        codice dove gli errori costano di più — qui giriamo soldi reali — quindi le regole sono
+        deliberatamente rigorose.
+      </p>
+
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>Tutti gli importi monetari sono <strong>interi in centesimi</strong>. MAI usare
+          float per il denaro: <code>5000</code> significa €50,00, mai
+          <code>50.00</code> a livello DB/PHP.</p></div>
+      </div>
+
+      <h2 id="modello">Il modello mentale</h2>
+      <p>
+        Separa due concetti distinti:
+      </p>
+      <ul>
+        <li><strong>Quota attesa</strong> — quello che lo studente <em>dovrebbe</em> pagare per un
+          certo periodo. Vive nelle tabelle <code>monthly_fees</code> e <code>enrollment_fees</code>
+          come <code>expected_amount</code>.</li>
+        <li><strong>Pagamento effettivo</strong> — un evento monetario reale (cash, bonifico, …).
+          Vive in <code>payments</code> come <code>amount</code>.</li>
+      </ul>
+      <p>
+        Un <code>Payment</code> "copre" una o più quote attese (relazione 1→N): registrare un
+        pagamento crea il <code>Payment</code> e contemporaneamente le <code>MonthlyFee</code> che
+        quel pagamento soddisfa.
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Pagamento ↔ Quote</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+erDiagram
+  STUDENT ||--o{ PAYMENT : "registra"
+  STUDENT ||--o{ MONTHLY_FEE : "deve"
+  STUDENT ||--o{ ENROLLMENT_FEE : "deve"
+  PAYMENT ||--o{ MONTHLY_FEE : "copre"
+  PAYMENT ||--o{ ENROLLMENT_FEE : "copre"
+  MONTHLY_FEE {
+    uuid id
+    uuid student_id
+    uuid payment_id
+    int expected_amount
+    string period
+    date due_date
+  }
+  PAYMENT {
+    uuid id
+    uuid student_id
+    int amount
+    string payment_method
+    datetime paid_at
+  }
+</pre>
+        </div>
+      </div>
+
+      <h2 id="tre-service">I tre service tariffe</h2>
+      <p>
+        La logica vive in <code>app/Services/</code> ed è divisa in tre service con responsabilità
+        distinte ma che si chiamano in catena:
+      </p>
+
+      <table>
+        <thead><tr><th>Service</th><th>Responsabilità</th></tr></thead>
+        <tbody>
+          <tr><td><code>FeeCalculationService</code></td><td>Calcoli puri sullo stato corrente: tariffa effettiva e saldo. Niente effetti collaterali.</td></tr>
+          <tr><td><code>MonthlyFeeService</code></td><td>Periodi scoperti, registrazione pagamenti mensili FIFO. Dipende da <code>FeeCalculationService</code>.</td></tr>
+          <tr><td><code>EnrollmentFeeService</code></td><td>Iscrizioni e rinnovi (pagina dedicata: <a data-href="dominio/iscrizioni.html">Iscrizioni</a>).</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="effective-rate">Tariffa effettiva</h2>
+      <p>
+        <code>FeeCalculationService::getEffectiveRate()</code> restituisce la quota mensile che si
+        applica a uno studente, in centesimi. Ordine di priorità:
+      </p>
+      <ol>
+        <li>Se <code>students.monthly_fee_override</code> non è null → quel valore.</li>
+        <li>Altrimenti, se lo studente ha gruppi → il <strong>minimo</strong> tra le
+          <code>groups.monthly_fee_amount</code>.</li>
+        <li>Altrimenti → <code>null</code> (lo studente non ha una tariffa applicabile).</li>
+      </ol>
+
+      <pre><code>// FeeCalculationService::getEffectiveRate
+if ($student-&gt;monthly_fee_override !== null) {
+    return $student-&gt;monthly_fee_override;
+}
+
+$groups = $student-&gt;relationLoaded('groups') ? $student-&gt;groups : $student-&gt;groups()-&gt;get();
+
+if ($groups-&gt;isEmpty()) {
+    return null;
+}
+
+return $groups-&gt;min('monthly_fee_amount');</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>La scelta del <em>minimo</em> tra i gruppi (anziché del massimo o di un altro
+          criterio) è una decisione di prodotto: chi è in più gruppi paga la tariffa più bassa, non
+          la somma. Se cambia, è qui che si modifica.</p></div>
+      </div>
+
+      <h2 id="saldo">Saldo dello studente</h2>
+      <p>
+        <code>FeeCalculationService::getBalance()</code> ritorna il saldo in centesimi:
+        positivo = credito, negativo = debito.
+      </p>
+      <p><strong>Formula:</strong></p>
+      <pre><code>balance = SUM(payments.amount)
+        - SUM(monthly_fees.expected_amount)
+        - SUM(enrollment_fees.expected_amount)</code></pre>
+
+      <h2 id="periodi-scoperti">Periodi scoperti</h2>
+      <p>
+        <code>MonthlyFeeService::getUncoveredPeriods(Student $student)</code> ritorna l'elenco
+        delle stringhe <code>"YYYY-MM"</code> dei mesi <strong>dovuti</strong> per cui non esiste
+        ancora una <code>MonthlyFee</code>. È il dato chiave dell'elenco allievi (badge "quote
+        scoperte") e della dashboard.
+      </p>
+
+      <h3 id="ancora">L'ancora temporale</h3>
+      <p>
+        Il calcolo parte da <code>students.current_cycle_started_at</code>: la data in cui inizia
+        il <em>ciclo corrente</em> di obblighi. Se è <code>null</code>, lo studente non ha ancora
+        debiti mensili (non ha pagato la prima volta).
+      </p>
+      <p>
+        Il giorno dell'ancora determina quando scade la quota di ogni mese: se l'ancora è il 15
+        gennaio, la quota di febbraio scade il 15 febbraio. Per i mesi con meno giorni
+        (es. ancora = 31), la data viene "clamped" all'ultimo giorno disponibile
+        (<code>clampToMonth</code>).
+      </p>
+
+      <h3 id="algoritmo">L'algoritmo</h3>
+      <ol>
+        <li>Parti dall'ancora <code>current_cycle_started_at</code>.</li>
+        <li>Per ogni mese da quel mese fino a oggi (incluso il mese corrente se la <code>due_date</code> non è futura):
+          <ul>
+            <li>Calcola <code>due_date</code> con il giorno-ancora clampato al mese.</li>
+            <li>Se la <code>due_date</code> è <strong>passata</strong> e non esiste una
+              <code>MonthlyFee</code> con quel <code>period</code> → aggiungi il periodo
+              all'elenco "scoperto".</li>
+          </ul>
+        </li>
+        <li>Ferma quando la <code>due_date</code> è futura.</li>
+      </ol>
+
+      <p>
+        Per la dashboard, <code>getUncoveredCountsBatch(Collection $students)</code> ritorna una
+        mappa <code>student_id → count</code> in un solo loop.
+      </p>
+
+      <h2 id="registrazione">Registrazione di un pagamento mensile</h2>
+      <p>
+        <code>MonthlyFeeService::registerPayment(Student $student, int $months, int $amount, ?string $notes)</code>
+        è l'operazione critica: crea un <code>Payment</code> e le <code>MonthlyFee</code> che
+        quel pagamento copre.
+      </p>
+
+      <p><strong>Sequenza:</strong></p>
+      <ol>
+        <li>Se è il primo pagamento, fissa <code>current_cycle_started_at = today</code>.</li>
+        <li>Recupera <code>effective_rate</code> via <code>FeeCalculationService</code>.</li>
+        <li>Crea il <code>Payment</code> con <code>amount</code>, <code>paid_at = now()</code>,
+          <code>payment_method = Cash</code> (oggi l'unico supportato).</li>
+        <li>Calcola i periodi scoperti più vecchi (FIFO). Se <code>$months</code> &gt; periodi
+          scoperti, estende nel futuro per coprire mensilità anticipate.</li>
+        <li>Per ogni periodo coperto, crea una <code>MonthlyFee</code> con
+          <code>payment_id</code>, <code>period = "YYYY-MM"</code>, <code>due_date</code> calcolata
+          dal giorno-ancora, <code>expected_amount = effective_rate</code>.</li>
+      </ol>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>L'<strong>UNIQUE</strong> sulla coppia <code>(tenant_id, student_id, period)</code>
+          della tabella <code>monthly_fees</code> garantisce che non si possa registrare due volte
+          lo stesso mese per lo stesso allievo, anche con race condition.</p></div>
+      </div>
+
+      <h2 id="enum-method">Metodo di pagamento</h2>
+      <p>
+        <code>PaymentMethod</code> è un backed enum (<code>app/Enums/PaymentMethod.php</code>).
+        Oggi ha un solo case: <code>Cash</code>. È strutturato come enum per estensione futura
+        (bonifico, carta, online via Stripe Connect).
+      </p>
+
+      <h2 id="test-rif">Test di riferimento</h2>
+      <ul>
+        <li><code>tests/Feature/Tenant/PaymentEdgeCasesTest.php</code> — casi limite del denaro:
+          giorni-ancora a fine mese, mesi a febbraio, pagamenti che estendono nel futuro,
+          isolamento tra tenant.</li>
+        <li><code>tests/Unit/Services/FeeCalculationServiceTest.php</code> — calcolo tariffa
+          effettiva e saldo, edge case puri.</li>
+      </ul>
+      <p>
+        Qualunque modifica alla logica dei pagamenti DEVE far passare questi test prima del merge.
+        Aggiungere un nuovo edge case? Aggiungere il test corrispondente in
+        <code>PaymentEdgeCasesTest</code>.
+      </p>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing · TrainerHub</title>
+<meta name="description" content="Pest, RefreshDatabase, factory per modello, test isolamento tenant obbligatori.">
+<meta name="doc-title" content="Testing">
+<meta name="doc-section" content="Operazioni">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Operazioni</span><span class="sep">/</span>
+        <span>Testing</span>
+      </div>
+
+      <h1>Testing</h1>
+
+      <p>
+        TrainerHub usa <strong>Pest 4</strong> (sopra PHPUnit) per i test. La suite gira ad ogni
+        push e PR via <code>tests.yml</code>. Ci sono due tipi di test:
+        <strong>Feature</strong> (controller end-to-end, isolamento tenant) e
+        <strong>Unit</strong> (service di dominio puri).
+      </p>
+
+      <h2 id="comandi">Comandi essenziali</h2>
+      <pre><code>composer test                # lint:check + suite Pest completa
+./vendor/bin/pest            # solo suite
+./vendor/bin/pest --filter "registra pagamento"
+./vendor/bin/pest tests/Feature/Tenant/PaymentEdgeCasesTest.php
+./vendor/bin/pest --parallel
+composer ci:check            # tutto ciò che gira in CI (lint, types, test)</code></pre>
+
+      <h2 id="struttura">Struttura</h2>
+      <pre><code>tests/
+├── Pest.php                          — bootstrap Pest (extend, expect, dataset)
+├── TestCase.php                      — base class (estende Laravel TestCase)
+├── Feature/
+│   ├── DashboardTest.php
+│   ├── OnboardingTest.php
+│   └── Tenant/
+│       ├── StudentControllerTest.php
+│       ├── StudentGroupControllerTest.php
+│       ├── StudentLifecycleTest.php
+│       ├── PaymentEdgeCasesTest.php  — ⭐ riferimento per i casi limite denaro
+│       └── ...
+└── Unit/
+    ├── ExampleTest.php
+    └── Services/
+        ├── FeeCalculationServiceTest.php
+        ├── MonthlyFeeServiceTest.php
+        └── EnrollmentFeeServiceTest.php</code></pre>
+
+      <h2 id="pest-config"><code>Pest.php</code></h2>
+      <p>
+        Tutti i test ricevono automaticamente <code>RefreshDatabase</code> (DB pulito tra un test
+        e l'altro):
+      </p>
+      <pre><code>pest()-&gt;extend(Tests\TestCase::class)
+    -&gt;use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    -&gt;in('Feature', 'Unit/Services');</code></pre>
+
+      <h2 id="feature-tenant">Test tenant: il pattern standard</h2>
+      <p>
+        Per ogni test di feature tenant, il setup tipico è:
+      </p>
+      <pre><code>beforeEach(function () {
+    $this-&gt;user = User::factory()-&gt;create();
+    $this-&gt;tenant = Tenant::factory()-&gt;create(['owner_id' =&gt; $this-&gt;user-&gt;id]);
+    $this-&gt;user-&gt;update(['current_tenant_id' =&gt; $this-&gt;tenant-&gt;id]);
+    $this-&gt;actingAs($this-&gt;user);
+
+    // Inizializza tenancy per i test
+    tenancy()-&gt;initialize($this-&gt;tenant);
+});
+
+afterEach(function () {
+    tenancy()-&gt;end();
+});</code></pre>
+      <p>
+        <code>tenancy()-&gt;initialize(...)</code> attiva il contesto tenant <em>per il test</em>,
+        così il global scope <code>BelongsToTenant</code> filtra le query con il tenant giusto.
+        <code>tenancy()-&gt;end()</code> lo chiude per non sporcare il test successivo.
+      </p>
+
+      <h3 id="assertion">Assertion Inertia</h3>
+      <p>
+        Pest ha helper specifici per le risposte Inertia:
+      </p>
+      <pre><code>$response = $this-&gt;get("/app/{$this-&gt;tenant-&gt;slug}/students?status=all");
+
+$response-&gt;assertOk();
+$response-&gt;assertInertia(fn ($page) =&gt; $page
+    -&gt;component('Tenant/Student/Index')
+    -&gt;has('students', 3)
+);</code></pre>
+
+      <h2 id="categorie">Categorie obbligatorie per ogni feature</h2>
+      <p>
+        Dalla regola di progetto (<code>CLAUDE.md</code>): per ogni nuova feature, copri
+        <strong>almeno</strong> queste categorie di test:
+      </p>
+
+      <h3 id="validation">1. Validation tests</h3>
+      <p>
+        Submit form con campi mancanti, formati non validi, valori fuori range, valori al limite
+        + 1. Usa i <strong>dataset Pest</strong> per più payload invalidi senza copia-incolla:
+      </p>
+      <pre><code>test('rifiuta payload invalido', function (array $payload, string $field) {
+    $response = $this-&gt;post("/app/{$this-&gt;tenant-&gt;slug}/students", $payload);
+    $response-&gt;assertSessionHasErrors($field);
+})-&gt;with([
+    'no first name' =&gt; [['last_name' =&gt; 'Rossi'], 'first_name'],
+    'invalid email' =&gt; [['first_name' =&gt; 'Mario', 'last_name' =&gt; 'R.', 'email' =&gt; 'foo'], 'email'],
+    'date in futuro'=&gt; [['first_name' =&gt; 'M', 'last_name' =&gt; 'R', 'date_of_birth' =&gt; '2099-01-01'], 'date_of_birth'],
+]);</code></pre>
+
+      <h3 id="authz">2. Authorization tests</h3>
+      <p>
+        Verifica che un tenant <strong>non veda né tocchi dati di un altro tenant</strong>.
+        Esempio canonico:
+      </p>
+      <pre><code>test('tenant A non vede studenti di tenant B', function () {
+    // Setup tenant A (dal beforeEach)
+    Student::factory()-&gt;count(2)-&gt;create();   // appartengono ad A
+
+    // Crea tenant B con un altro studente
+    tenancy()-&gt;end();
+    $userB = User::factory()-&gt;create();
+    $tenantB = Tenant::factory()-&gt;create(['owner_id' =&gt; $userB-&gt;id]);
+    tenancy()-&gt;initialize($tenantB);
+    $studentB = Student::factory()-&gt;create(['first_name' =&gt; 'X-tenant']);
+    tenancy()-&gt;end();
+
+    // Torna su tenant A
+    tenancy()-&gt;initialize($this-&gt;tenant);
+
+    $response = $this-&gt;get("/app/{$this-&gt;tenant-&gt;slug}/students?status=all");
+
+    $response-&gt;assertInertia(fn ($page) =&gt; $page
+        -&gt;has('students.data', 2)
+        -&gt;where('students.data.0.first_name', fn ($n) =&gt; $n !== 'X-tenant')
+    );
+});</code></pre>
+
+      <p>
+        Test anche: accesso non autenticato a route protette (<code>assertRedirect('/login')</code>),
+        accesso a tenant non posseduto (<code>assertForbidden()</code>).
+      </p>
+
+      <h3 id="business-rules">3. Business rule enforcement</h3>
+      <p>
+        Se la user story dice "X è obbligatorio" o "prevenire Y", scrivi un test che dimostra che
+        il vincolo è applicato lato backend, non solo come warning UI.
+      </p>
+
+      <h3 id="destructive">4. Destructive action safeguards</h3>
+      <p>
+        Per ogni delete/disable/cancel: cosa succede se elimini l'ultimo elemento? Esempio: il
+        tenant prova a rimuovere l'ultimo gruppo di un allievo che ha
+        <code>monthly_fee_override = null</code> → <code>FeeCalculationService::getEffectiveRate</code>
+        ritorna <code>null</code>, e l'app deve gestire bene questo stato (non crashare al prossimo
+        calcolo del saldo).
+      </p>
+
+      <h2 id="factory">Factory per ogni modello</h2>
+      <p>
+        Ogni modello ha una factory in <code>database/factories/</code>: <code>UserFactory</code>,
+        <code>TenantFactory</code>, <code>StudentFactory</code>, <code>GroupFactory</code>,
+        <code>PaymentFactory</code>, <code>MonthlyFeeFactory</code>,
+        <code>EnrollmentFeeFactory</code>, ecc. Quando aggiungi un modello nuovo, aggiungi la
+        factory <em>nello stesso PR</em>.
+      </p>
+
+      <h2 id="unit">Test unit dei service</h2>
+      <p>
+        Per la logica pura (calcoli, edge case puramente algoritmici) usa
+        <code>tests/Unit/Services/</code>. Sono i test più veloci e i più mirati:
+      </p>
+      <pre><code>// tests/Unit/Services/FeeCalculationServiceTest.php
+test('priorità override sui gruppi', function () {
+    $student = Student::factory()-&gt;create(['monthly_fee_override' =&gt; 7000]);
+    $group = Group::factory()-&gt;create(['monthly_fee_amount' =&gt; 5000]);
+    $student-&gt;groups()-&gt;attach($group);
+
+    $rate = app(FeeCalculationService::class)-&gt;getEffectiveRate($student);
+
+    expect($rate)-&gt;toBe(7000);   // override vince
+});</code></pre>
+
+      <h2 id="ci-locale">CI locale prima del push</h2>
+      <p>
+        Prima di pushare, gira la stessa pipeline della CI:
+      </p>
+      <pre><code>composer ci:check</code></pre>
+      <p>Fa:</p>
+      <ul>
+        <li><code>npm run lint:check</code></li>
+        <li><code>npm run format:check</code></li>
+        <li><code>npm run types:check</code> (TypeScript)</li>
+        <li><code>composer test</code> (Pint + Pest)</li>
+      </ul>
+
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>Una PR senza test sufficienti per le 4 categorie (validation, authz, business
+          rules, destructive) <strong>non è completa</strong>. La review può chiedere di aggiungere
+          coverage prima del merge.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

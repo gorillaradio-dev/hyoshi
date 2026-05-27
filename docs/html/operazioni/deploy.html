@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploy & CI/CD · TrainerHub</title>
+<meta name="description" content="GitHub Actions: deploy.yml verso hyoshi-staging via SSH, tests.yml, lint.yml, sync-docs.yml.">
+<meta name="doc-title" content="Deploy & CI/CD">
+<meta name="doc-section" content="Operazioni">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Operazioni</span><span class="sep">/</span>
+        <span>Deploy & CI/CD</span>
+      </div>
+
+      <h1>Deploy & CI/CD</h1>
+
+      <p>
+        TrainerHub usa GitHub Actions per CI e CD. La regola d'oro: <strong>ogni push a
+        <code>main</code> deploya automaticamente</strong> all'ambiente staging
+        (<a href="https://hyoshi.gorillaradio.dev">hyoshi.gorillaradio.dev</a>). Niente
+        deploy manuali, niente push diretti al server.
+      </p>
+
+      <h2 id="ambienti">Ambienti</h2>
+      <table>
+        <thead><tr><th>Ambiente</th><th>URL</th><th>Branch sorgente</th><th>Server path</th></tr></thead>
+        <tbody>
+          <tr><td><strong>staging</strong></td><td>hyoshi.gorillaradio.dev</td><td><code>main</code></td><td><code>/var/www/hyoshi-staging</code></td></tr>
+          <tr><td><strong>production</strong></td><td>(non ancora)</td><td><code>production</code></td><td>(da definire)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="workflows">I workflow</h2>
+      <p>File in <code>.github/workflows/</code>. Tutti triggherano su push e/o pull request a <code>main</code>/<code>production</code>.</p>
+
+      <table>
+        <thead><tr><th>Workflow</th><th>Trigger</th><th>Cosa fa</th></tr></thead>
+        <tbody>
+          <tr><td><code>deploy.yml</code></td><td>push <code>main</code></td><td>SSH deploy a <code>hyoshi-staging</code> server</td></tr>
+          <tr><td><code>tests.yml</code></td><td>push + PR <code>main</code>/<code>production</code></td><td>Pest su PHP 8.4 e 8.5</td></tr>
+          <tr><td><code>lint.yml</code></td><td>push + PR <code>main</code>/<code>production</code></td><td>Pint (PHP) + ESLint + Prettier</td></tr>
+          <tr><td><code>sync-docs.yml</code></td><td>push <code>main</code> con cambi in <code>docs/html/**</code></td><td>Mirror docs verso portale centrale</td></tr>
+          <tr><td><code>claude.yml</code> · <code>claude-code-review.yml</code></td><td>Issue/PR/mention</td><td>Triage e code review automatici</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="deploy">Deploy a staging</h2>
+      <p>
+        File: <code>.github/workflows/deploy.yml</code>. Usa
+        <a href="https://github.com/appleboy/ssh-action"><code>appleboy/ssh-action</code></a> per
+        eseguire uno script SSH sul server. Job singolo, no sudo (i permessi sono pre-impostati,
+        vedi memory).
+      </p>
+
+      <pre><code>on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            set -e
+            cd /var/www/hyoshi-staging
+            git remote set-url origin git@github-hyoshi:gorillaradio-dev/hyoshi.git
+            rm -rf public/storage
+            git pull origin main
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan storage:link
+
+            npm ci
+            # Build con retry 3x (Wayfinder può fallire la prima volta)
+            for i in 1 2 3; do
+              if npm run build; then break; fi
+              [ $i -eq 3 ] && exit 1
+              sleep 60
+            done</code></pre>
+
+      <h2 id="server-config">Configurazione server</h2>
+      <table>
+        <thead><tr><th>Componente</th><th>Valore</th></tr></thead>
+        <tbody>
+          <tr><td>Path applicazione</td><td><code>/var/www/hyoshi-staging</code></td></tr>
+          <tr><td>Utente deploy</td><td><code>deploy</code> (NO sudo nei sudoers)</td></tr>
+          <tr><td>PHP</td><td>8.4 (php-fpm)</td></tr>
+          <tr><td>Web server</td><td>nginx + SSL via Cloudflare</td></tr>
+          <tr><td>Database</td><td>MySQL locale, DB <code>hyoshi_staging</code>, user <code>hyoshi_staging</code></td></tr>
+          <tr><td>HTTPS forzato</td><td><code>URL::forceScheme('https')</code> in <code>AppServiceProvider</code> (env staging/production)</td></tr>
+          <tr><td>SSH config server</td><td>alias <code>github-hyoshi</code> in <code>~/.ssh/config</code>, deploy key <code>~/.ssh/hyoshi_deploy</code></td></tr>
+          <tr><td>Permessi cartelle</td><td><code>storage</code> e <code>bootstrap/cache</code> = <code>deploy:www-data</code> 775 (impostati manualmente una volta)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="secrets">GitHub secrets richiesti</h2>
+      <ul>
+        <li><code>HOST</code> — hostname del server</li>
+        <li><code>PORT</code> — porta SSH</li>
+        <li><code>USERNAME</code> — utente di deploy (<code>deploy</code>)</li>
+        <li><code>SSH_PRIVATE_KEY</code> — chiave privata corrispondente alla deploy key registrata su GitHub</li>
+        <li><code>DOCS_SYNC_TOKEN</code> — PAT fine-grained Contents:Write su <code>gorillaradio-dev/go-docs</code> (solo per <code>sync-docs.yml</code>)</li>
+      </ul>
+
+      <h2 id="ci">Test e lint in CI</h2>
+      <p>
+        I workflow <code>tests.yml</code> e <code>lint.yml</code> girano su push e PR a
+        <code>main</code> e <code>production</code>. Setup matrix PHP 8.4 + 8.5, Node 22.
+        Una build rossa blocca implicitamente il merge (la review umana + le check fan il loro
+        lavoro).
+      </p>
+
+      <pre><code># tests.yml — sequenza essenziale
+- Setup PHP (8.4 e 8.5) con shivammathur/setup-php
+- Setup Node 22
+- npm i + composer install
+- cp .env.example .env + php artisan key:generate
+- npm run build
+- ./vendor/bin/pest
+
+# lint.yml
+- composer lint   (Pint)
+- npm run format  (Prettier)
+- npm run lint    (ESLint)</code></pre>
+
+      <h2 id="sync-docs">Sync docs verso portale</h2>
+      <p>
+        <code>sync-docs.yml</code> mirror-a <code>docs/html/</code> verso il subfolder
+        <code>hyoshi/</code> del repo <code>gorillaradio-dev/go-docs</code>. Da lì, un Cloudflare
+        Worker serve <a href="https://docs.gorillaradio.dev">docs.gorillaradio.dev</a> — quindi
+        ogni push docs è di fatto un deploy del portale.
+      </p>
+      <ul>
+        <li>Trigger limitato a cambi in <code>docs/html/**</code>.</li>
+        <li>Concurrency group <code>sync-docs-${{ github.ref }}</code>: una push doppia non racing.</li>
+        <li>Usa <code>DOCS_SYNC_TOKEN</code>, non <code>GITHUB_TOKEN</code> (scope limitato al repo destinazione).</li>
+      </ul>
+
+      <h2 id="rollback">Rollback</h2>
+      <p>
+        Non esiste un meccanismo automatico. Per ora:
+      </p>
+      <ol>
+        <li>Identifica il commit ultimo "buono" su <code>main</code>.</li>
+        <li>Revert sul ramo o crea una PR di revert: <code>git revert &lt;sha&gt;</code> + PR.</li>
+        <li>Mergia la PR di revert su <code>main</code> → il workflow deploy ridepiega.</li>
+      </ol>
+      <p>
+        Per emergenze, è possibile fare push diretto su <code>main</code> dell'utente con i
+        permessi (no PR), ma è da evitare salvo casi davvero urgenti.
+      </p>
+
+      <h2 id="monitoraggio">Monitoraggio CI</h2>
+      <p>Comandi utili dal terminale:</p>
+      <pre><code>gh run list --branch main --limit 5
+gh run view &lt;run-id&gt;
+gh run view &lt;run-id&gt; --log-failed
+gh workflow run deploy.yml --ref main   # trigger manuale</code></pre>
+
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>Mai aggiungere <code>sudo</code> al deploy script. La filosofia è: il server è
+          pre-configurato una volta, l'utente <code>deploy</code> ha solo i permessi che servono,
+          il workflow non può escalare. Se serve un nuovo permesso, lo si imposta a mano sul
+          server (e si documenta).</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

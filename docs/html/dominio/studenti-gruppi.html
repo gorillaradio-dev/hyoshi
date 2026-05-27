@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studenti e gruppi · TrainerHub</title>
+<meta name="description" content="Modello Student e Group, relazione molti-a-molti tramite group_student, gruppo primario.">
+<meta name="doc-title" content="Studenti e gruppi">
+<meta name="doc-section" content="Dominio">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Dominio</span><span class="sep">/</span>
+        <span>Studenti e gruppi</span>
+      </div>
+
+      <h1>Studenti e gruppi</h1>
+
+      <p>
+        Lo studente (allievo) è l'entità centrale del dominio. Vive dentro un tenant, ha una serie
+        di contatti d'emergenza, può appartenere a uno o più gruppi (corsi/discipline), e accumula
+        quote mensili e iscrizioni nel tempo.
+      </p>
+
+      <h2 id="student">Il modello <code>Student</code></h2>
+      <p>
+        File: <code>app/Models/Student.php</code>. Usa <code>HasUuids</code>, <code>BelongsToTenant</code>
+        e <code>SoftDeletes</code>: ogni studente è UUID, scoped al tenant, e può essere cancellato
+        solo "logicamente".
+      </p>
+
+      <h3 id="campi">Campi principali</h3>
+      <table>
+        <thead><tr><th>Campo</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>first_name</code> · <code>last_name</code></td><td>string</td><td>Obbligatori.</td></tr>
+          <tr><td><code>email</code> · <code>phone</code></td><td>string nullable</td><td>Contatti diretti dello studente.</td></tr>
+          <tr><td><code>phone_contact_id</code></td><td>FK → <code>emergency_contacts</code></td><td>Se valorizzato, sostituisce <code>phone</code> via <code>effective_phone</code> accessor.</td></tr>
+          <tr><td><code>date_of_birth</code></td><td>date</td><td>Cast a <code>date:Y-m-d</code>.</td></tr>
+          <tr><td><code>fiscal_code</code></td><td>string nullable</td><td>Codice fiscale (utile in Italia).</td></tr>
+          <tr><td><code>address</code></td><td>string nullable</td><td>—</td></tr>
+          <tr><td><code>status</code></td><td><code>StudentStatus</code> enum nullable</td><td>Solo <code>Suspended</code> è persistito; <code>Active</code>/<code>Pending</code> sono calcolati (vedi sotto).</td></tr>
+          <tr><td><code>monthly_fee_override</code></td><td>int (centesimi) nullable</td><td>Override della tariffa di gruppo. Prima nella priorità di calcolo.</td></tr>
+          <tr><td><code>current_cycle_started_at</code></td><td>date nullable</td><td>Ancora temporale per il calcolo dei mesi dovuti (impostato al primo pagamento).</td></tr>
+          <tr><td><code>past_cycles</code></td><td>array (JSON)</td><td>Storico dei cicli precedenti (in caso di sospensione/riattivazione).</td></tr>
+          <tr><td><code>enrolled_at</code></td><td>date</td><td>Data prima iscrizione.</td></tr>
+          <tr><td><code>notes</code></td><td>text nullable</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="relazioni">Relazioni</h3>
+      <ul>
+        <li><code>emergencyContacts(): HasMany</code> — contatti d'emergenza.</li>
+        <li><code>phoneContact(): BelongsTo</code> — quale contatto usare come telefono principale.</li>
+        <li><code>enrollmentFees(): HasMany</code> — iscrizioni annuali.</li>
+        <li><code>monthlyFees(): HasMany</code> — quote mensili attese.</li>
+        <li><code>payments(): HasMany</code> — pagamenti effettivi.</li>
+        <li><code>documents(): HasMany</code> — certificati, privacy, ID.</li>
+        <li><code>groups(): BelongsToMany</code> — gruppi a cui appartiene (via pivot).</li>
+      </ul>
+
+      <h3 id="effective-status">Stato effettivo</h3>
+      <p>
+        Lo stato visibile dello studente (<code>effective_status</code>) è in parte calcolato. La
+        colonna <code>status</code> sul DB serve solo a memorizzare <code>Suspended</code>; tutto
+        il resto è derivato in tempo reale dall'iscrizione corrente.
+      </p>
+
+      <pre><code>// Student::effectiveStatus accessor
+if ($this-&gt;status === StudentStatus::Suspended) {
+    return StudentStatus::Suspended-&gt;value;
+}
+
+$enrollmentService = app(EnrollmentFeeService::class);
+if ($enrollmentService-&gt;hasValidEnrollment($this)) {
+    return StudentStatus::Active-&gt;value;
+}
+
+return StudentStatus::Pending-&gt;value;</code></pre>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Questo refactor è stato introdotto in
+          <code>docs/plans/2026-04-09-student-lifecycle-refactor.md</code>: prima lo stato era
+          interamente persistito e si "desincronizzava" facilmente. Ora la sola fonte di verità
+          dell'attività è l'esistenza di un'iscrizione valida.</p></div>
+      </div>
+
+      <h2 id="group">Il modello <code>Group</code></h2>
+      <p>
+        File: <code>app/Models/Group.php</code>. Rappresenta un corso/disciplina/gruppo di
+        allenamento. Tenant-scoped, UUID.
+      </p>
+      <table>
+        <thead><tr><th>Campo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>Nome visibile (es. "BJJ Adulti Sera").</td></tr>
+          <tr><td><code>description</code></td><td>Opzionale.</td></tr>
+          <tr><td><code>color</code></td><td>Per badge/UI.</td></tr>
+          <tr><td><code>monthly_fee_amount</code></td><td>Tariffa mensile del gruppo (centesimi). Usata da <code>FeeCalculationService</code> se lo studente non ha <code>monthly_fee_override</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="pivot">La pivot <code>group_student</code></h2>
+      <p>
+        Il legame studente↔gruppo è many-to-many con una pivot dedicata: <code>group_student</code>.
+        Modellata come <code>App\Models\GroupStudent</code> (estende <code>Pivot</code>), tenant-scoped
+        e UUID per coerenza con il resto del dominio.
+      </p>
+      <pre><code>// Group::students
+return $this-&gt;belongsToMany(Student::class, 'group_student')
+    -&gt;using(GroupStudent::class)
+    -&gt;withPivot('is_primary')
+    -&gt;withTimestamps();</code></pre>
+
+      <p>
+        Il flag <code>is_primary</code> sulla pivot indica il <strong>gruppo principale</strong>
+        dell'allievo, usato per default in UI quando va mostrato "un solo gruppo" (es. nel badge
+        della riga elenco).
+      </p>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Studente ↔ Gruppi (con pivot)</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+erDiagram
+  STUDENT ||--o{ GROUP_STUDENT : "appartiene"
+  GROUP ||--o{ GROUP_STUDENT : "include"
+  GROUP_STUDENT {
+    uuid id
+    uuid student_id
+    uuid group_id
+    bool is_primary
+  }
+</pre>
+        </div>
+      </div>
+
+      <h2 id="contatti">Contatti d'emergenza</h2>
+      <p>
+        <code>EmergencyContact</code> (tenant-scoped, UUID) appartiene a uno <code>Student</code>.
+        Uno di questi può essere designato come "contatto telefonico principale" via
+        <code>students.phone_contact_id</code>: l'accessor <code>effective_phone</code> ritorna il
+        suo numero, oppure il <code>phone</code> diretto dello studente come fallback.
+      </p>
+
+      <h2 id="lifecycle">Ciclo di vita</h2>
+      <ol>
+        <li><strong>Creazione</strong> — anagrafica via <code>StoreStudentRequest</code> + <code>StudentController::store</code>.</li>
+        <li><strong>Iscrizione</strong> — almeno una <code>EnrollmentFee</code> registrata: lo stato passa a <code>Active</code>.</li>
+        <li><strong>Pagamenti mensili</strong> — quote dovute calcolate da <code>current_cycle_started_at</code>; <code>MonthlyFeeService::registerPayment</code> le marca FIFO.</li>
+        <li><strong>Iscrizione scaduta</strong> — torna a <code>Pending</code> automaticamente.</li>
+        <li><strong>Sospensione manuale</strong> — endpoint <code>PUT students/{id}/suspend</code> imposta <code>status = Suspended</code> e annota il ciclo in <code>past_cycles</code>.</li>
+        <li><strong>Riattivazione</strong> — <code>PUT students/{id}/reactivate</code> rimuove la sospensione.</li>
+        <li><strong>Cancellazione</strong> — soft delete (la riga resta sul DB con <code>deleted_at</code> valorizzato).</li>
+      </ol>
+
+      <p>
+        Per la sequenza completa degli stati vedi <a data-href="dominio/enum-stato.html#student-status">StudentStatus</a>.
+        Per il calcolo dei mesi dovuti vedi <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>.
+      </p>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

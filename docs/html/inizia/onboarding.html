@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding sviluppatore · TrainerHub</title>
+<meta name="description" content="Guida pratica per chi entra nel codebase: cosa leggere prima, layer da capire, comandi essenziali.">
+<meta name="doc-title" content="Onboarding sviluppatore">
+<meta name="doc-section" content="Inizia">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Inizia</span><span class="sep">/</span>
+        <span>Onboarding sviluppatore</span>
+      </div>
+
+      <h1>Onboarding sviluppatore</h1>
+
+      <p>
+        Sei nuovo in TrainerHub? Questa pagina è un percorso lineare per orientarti nel codebase
+        nell'ordine giusto: prima i concetti, poi i layer, infine i punti di attenzione. Non
+        leggere a caso — il progetto è multi-tenant e capire <em>quello</em> per primo evita di
+        fraintendere il resto.
+      </p>
+
+      <h2 id="prerequisiti">Prerequisiti</h2>
+      <ul>
+        <li>PHP 8.3 (preferito) o 8.4 — il deploy gira su 8.4, la CI testa su 8.4 e 8.5.</li>
+        <li>Composer 2.x.</li>
+        <li>Node 22 + npm (i workflow CI usano Node 22).</li>
+        <li>MySQL 8 locale: utente <code>root</code>, no password, database <code>trainerhub</code>.</li>
+        <li>Git con accesso a <a href="https://github.com/gorillaradio-dev/hyoshi">gorillaradio-dev/hyoshi</a>.</li>
+      </ul>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Per la procedura passo-passo di setup vedi <a data-href="operazioni/setup.html">Setup locale</a>.
+          Qui ci concentriamo su <em>come orientarsi</em> nel codice, non su come installarlo.</p></div>
+      </div>
+
+      <h2 id="percorso">Il percorso consigliato</h2>
+      <p>
+        L'ordine conta. Le sezioni più in basso danno per scontato che hai capito quelle in alto.
+      </p>
+
+      <ol>
+        <li>
+          <strong>Cosa fa TrainerHub.</strong> Parti dalla <a data-href="overview.html">Panoramica</a>:
+          gestionale multi-tenant per personal trainer; ogni trainer gestisce allievi, gruppi,
+          quote mensili e iscrizioni dentro il suo "spazio" isolato.
+        </li>
+        <li>
+          <strong>Multi-tenancy single-database.</strong> È <em>la</em> cosa da capire bene prima
+          di tutto il resto. Vedi <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>:
+          tutti i tenant condividono lo stesso DB, ma un global scope su <code>tenant_id</code>
+          impedisce a un tenant di vedere dati di un altro.
+        </li>
+        <li>
+          <strong>Architettura applicativa.</strong> <a data-href="architettura.html">Vista
+          d'insieme</a> per i layer (HTTP → Dominio → Dati, frontend React via Inertia), poi
+          <a data-href="modello-dati.html">Modello dati</a> per le entità reali.
+        </li>
+        <li>
+          <strong>Il dominio dei pagamenti.</strong> È la parte più sottile del progetto.
+          <a data-href="dominio/quote-pagamenti.html">Quote mensili</a> e
+          <a data-href="dominio/iscrizioni.html">Iscrizioni</a> spiegano i tre service tariffe
+          (<code>FeeCalculationService</code>, <code>MonthlyFeeService</code>,
+          <code>EnrollmentFeeService</code>). Gli importi sono <strong>interi in centesimi</strong>:
+          ricordatelo prima di scrivere qualunque calcolo.
+        </li>
+        <li>
+          <strong>HTTP e frontend.</strong> <a data-href="http/routing.html">Routing</a> +
+          <a data-href="http/controller.html">Controller</a> per capire come arriva una richiesta;
+          poi <a data-href="frontend/inertia.html">Architettura Inertia</a> per capire come la
+          risposta diventa una pagina React.
+        </li>
+        <li>
+          <strong>Convenzioni.</strong> <a data-href="frontend/convenzioni.html">Convenzioni
+          frontend</a> e <code>CLAUDE.md</code> nella radice del repo: regole non negoziabili
+          (UUID, centesimi, mai <code>any</code> in TS, shadcn obbligatorio, mobile-first).
+        </li>
+        <li>
+          <strong>Deploy e branch strategy.</strong>
+          <a data-href="operazioni/branch-strategy.html">Branch strategy</a> +
+          <a data-href="operazioni/deploy.html">Deploy</a>: <code>main</code> è il trunk e
+          deploya all'ambiente staging via GitHub Actions.
+        </li>
+      </ol>
+
+      <h2 id="concetti-chiave">Concetti chiave (da sapere a memoria)</h2>
+      <ul>
+        <li>
+          <strong>Multi-tenancy single-database.</strong> Un solo database condiviso, colonna
+          <code>tenant_id</code> su ogni tabella tenant-scoped, isolamento gestito dal trait
+          <code>BelongsToTenant</code> di stancl/tenancy.
+        </li>
+        <li>
+          <strong>Controller thin + Service.</strong> I controller validano (FormRequest),
+          applicano le Policy e delegano la business logic ai service in <code>app/Services</code>.
+        </li>
+        <li>
+          <strong>UUID + centesimi.</strong> Chiavi primarie UUID via trait <code>HasUuids</code>;
+          importi monetari come <code>integer</code> in centesimi (es. <code>5000</code> = €50,00).
+        </li>
+        <li>
+          <strong>Backed enum PHP.</strong> <code>StudentStatus</code>, <code>PaymentMethod</code>,
+          <code>DocumentType</code>, <code>DocumentStatus</code>: stati non validi impossibili a
+          livello di tipo.
+        </li>
+        <li>
+          <strong>Inertia, non REST.</strong> Il backend non espone un'API JSON: risponde con il
+          nome di un componente React e le sue props; il frontend lo monta via
+          <code>resolvePageComponent</code>.
+        </li>
+        <li>
+          <strong>Mobile-first.</strong> Il trainer usa spesso il telefono — ogni pagina nuova va
+          pensata mobile e poi adattata desktop, non viceversa.
+        </li>
+      </ul>
+
+      <h2 id="primo-task">Quando metti mano al codice</h2>
+      <p>Per ogni cambiamento, queste sono le abitudini che ti aspettiamo:</p>
+      <ul>
+        <li>
+          Una <strong>modifica tenant-scoped</strong> richiede sempre il trait
+          <code>BelongsToTenant</code> sul modello <em>e</em> una Policy sul controller.
+        </li>
+        <li>
+          Mai <code>any</code> / <code>!</code> / <code>as</code> non sicuri in TypeScript. Se
+          TS si lamenta, risolvi alla radice con tipi corretti, hook custom o guard.
+        </li>
+        <li>
+          Mai creare un componente UI a mano: cerca prima su
+          <a href="https://ui.shadcn.com/docs/components">shadcn/ui</a> e usa quello.
+        </li>
+        <li>
+          Per ogni feature scrivi <strong>almeno</strong> un feature test (Pest) che verifichi
+          l'isolamento tenant: tenant A non deve vedere/toccare dati di tenant B.
+        </li>
+        <li>
+          Vai sempre via PR verso <code>main</code> (default branch). Se il tuo lavoro deve
+          essere mergiato e chiudere un'issue, usa <code>Closes #N</code> nel body.
+        </li>
+      </ul>
+
+      <h2 id="hotspot">Punti di attenzione</h2>
+      <p>
+        Aree del codice che concentrano molta logica e dove un cambio rischia di rompere
+        molte cose. Vedi la pagina dedicata <a data-href="riferimenti/hotspot.html">Hotspot di
+        complessità</a> per i dettagli.
+      </p>
+
+      <h2 id="bussola">La tua bussola</h2>
+      <table>
+        <thead><tr><th>Quando ti chiedi…</th><th>Vai a…</th></tr></thead>
+        <tbody>
+          <tr><td>"Come è organizzato il codice?"</td><td><a data-href="architettura.html">Architettura</a></td></tr>
+          <tr><td>"Perché un tenant non vede l'altro?"</td><td><a data-href="architettura/multi-tenancy.html">Multi-tenancy</a></td></tr>
+          <tr><td>"Come funziona il calcolo dei pagamenti?"</td><td><a data-href="dominio/quote-pagamenti.html">Quote e pagamenti</a></td></tr>
+          <tr><td>"Dove valido i dati di un form?"</td><td><a data-href="http/controller.html">Controller &amp; FormRequest</a></td></tr>
+          <tr><td>"Come aggiungo una pagina React?"</td><td><a data-href="frontend/inertia.html">Architettura Inertia</a></td></tr>
+          <tr><td>"Come deployo / com'è la CI?"</td><td><a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a></td></tr>
+          <tr><td>"In quale branch metto il mio lavoro?"</td><td><a data-href="operazioni/branch-strategy.html">Branch strategy</a></td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

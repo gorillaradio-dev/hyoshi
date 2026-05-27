@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iscrizioni (enrollment fees) · TrainerHub</title>
+<meta name="description" content="EnrollmentFee, durata configurabile per tenant, rinnovo anticipato, hasValidEnrollment.">
+<meta name="doc-title" content="Iscrizioni (enrollment fees)">
+<meta name="doc-section" content="Dominio">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Dominio</span><span class="sep">/</span>
+        <span>Iscrizioni (enrollment fees)</span>
+      </div>
+
+      <h1>Iscrizioni (enrollment fees)</h1>
+
+      <p>
+        L'<strong>iscrizione</strong> (enrollment fee) è la quota una tantum che lo studente paga
+        per essere "in regola" come associato. Ha una validità a tempo (di default 12 mesi) e
+        determina lo stato attivo dello studente: senza un'iscrizione valida, lo studente è
+        in <code>Pending</code> a prescindere dai pagamenti mensili.
+      </p>
+
+      <h2 id="modello">Modello <code>EnrollmentFee</code></h2>
+      <p>
+        File: <code>app/Models/EnrollmentFee.php</code>. Tenant-scoped, UUID. Una riga = una
+        iscrizione registrata.
+      </p>
+      <table>
+        <thead><tr><th>Campo</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>student_id</code></td><td>FK → <code>students</code>.</td></tr>
+          <tr><td><code>payment_id</code></td><td>FK → <code>payments</code>: il pagamento effettivo che ha coperto l'iscrizione.</td></tr>
+          <tr><td><code>expected_amount</code></td><td>Quota attesa in centesimi.</td></tr>
+          <tr><td><code>starts_at</code></td><td>Data inizio validità.</td></tr>
+          <tr><td><code>expires_at</code></td><td>Data fine validità (calcolata: <code>starts_at + enrollment_duration_months</code>).</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="durata">Durata configurabile per tenant</h2>
+      <p>
+        La durata dell'iscrizione vive nei <strong>settings del tenant</strong>, non è hardcoded:
+      </p>
+      <pre><code>$durationMonths = tenant()?-&gt;settings['enrollment_duration_months'] ?? 12;</code></pre>
+      <p>
+        Default 12 mesi. Un tenant può scegliere un'altra durata (es. anno sportivo
+        settembre-agosto = 12 mesi spostati, oppure 6 mesi per pacchetti semestrali).
+      </p>
+
+      <h2 id="rinnovo">Rinnovo anticipato</h2>
+      <p>
+        Una caratteristica importante di <code>EnrollmentFeeService::registerEnrollment</code> è
+        che gestisce il <strong>rinnovo anticipato</strong>: se lo studente ha già un'iscrizione
+        ancora valida, la nuova parte dalla <strong>scadenza</strong> dell'attuale, non da oggi.
+        Risultato: non si "perde" il tempo residuo.
+      </p>
+
+      <pre><code>$latestEnrollment = $this-&gt;getLatestEnrollment($student);
+
+if ($latestEnrollment && $latestEnrollment-&gt;expires_at-&gt;isFuture()) {
+    $startsAt = $latestEnrollment-&gt;expires_at;   // rinnovo anticipato
+} else {
+    $startsAt = Carbon::today();                  // prima iscrizione o iscrizione scaduta
+}
+
+$expiresAt = $startsAt-&gt;copy()-&gt;addMonths($durationMonths);</code></pre>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Sequenza rinnovo anticipato</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+gantt
+  dateFormat YYYY-MM-DD
+  axisFormat %b %Y
+  section Iscrizione 1
+  Validità : a1, 2026-01-15, 365d
+  section Rinnovo (anticipato il 1 dicembre)
+  Validità : a2, 2027-01-15, 365d
+</pre>
+        </div>
+      </div>
+
+      <h2 id="registrazione">Registrazione: cosa succede</h2>
+      <p>
+        <code>EnrollmentFeeService::registerEnrollment(Student $student, int $amount, ?string $notes)</code>
+        in sequenza:
+      </p>
+      <ol>
+        <li>Legge la durata dai settings del tenant (default 12).</li>
+        <li>Decide <code>starts_at</code> (rinnovo anticipato vs prima iscrizione/scaduta).</li>
+        <li>Calcola <code>expires_at = starts_at + durationMonths</code>.</li>
+        <li>Crea un <code>Payment</code> con <code>payment_method = Cash</code> e <code>paid_at = now()</code>.</li>
+        <li>Crea l'<code>EnrollmentFee</code> collegata al <code>Payment</code>.</li>
+        <li>Ritorna il <code>Payment</code> creato.</li>
+      </ol>
+
+      <h2 id="validita">Verifica della validità</h2>
+      <p>
+        Due metodi di servizio rispondono a "lo studente è in regola?".
+      </p>
+      <ul>
+        <li>
+          <strong><code>hasValidEnrollment(Student $student): bool</code></strong> — <code>true</code>
+          se l'ultima iscrizione esiste ed è ancora valida (<code>expires_at</code> non passata).
+          Questo è il metodo chiamato da <code>Student::effectiveStatus</code> per decidere
+          <code>Active</code> vs <code>Pending</code>.
+        </li>
+        <li>
+          <strong><code>isEnrollmentExpired(Student $student): bool</code></strong> — <code>true</code>
+          solo se ha avuto un'iscrizione e questa è ora scaduta. <code>false</code> se non ha mai
+          fatto iscrizione (utile per distinguere "mai iscritto" da "scaduto").
+        </li>
+      </ul>
+
+      <h2 id="ui">UI</h2>
+      <p>
+        La registrazione dell'iscrizione avviene tramite il dialog
+        <code>resources/js/components/register-enrollment-dialog.tsx</code>, lanciato dalla pagina
+        <code>Tenant/Student/Show.tsx</code>. L'endpoint backend è:
+      </p>
+      <pre><code>POST app/{tenant}/students/{student}/payments/enrollment
+→ StudentPaymentController::registerEnrollment</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>L'iscrizione è disaccoppiata dalle quote mensili: pagare il mese non rinnova
+          l'iscrizione, e viceversa. Sono due flussi separati che convivono nello stesso
+          <code>payments</code> ma con tipologie attese diverse (<code>enrollment_fees</code> vs
+          <code>monthly_fees</code>).</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

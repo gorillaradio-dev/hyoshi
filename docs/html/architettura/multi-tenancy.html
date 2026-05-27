@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-tenancy · TrainerHub</title>
+<meta name="description" content="Come stancl/tenancy isola i dati: identificazione per path, global scope su tenant_id, middleware tenant.access.">
+<meta name="doc-title" content="Multi-tenancy">
+<meta name="doc-section" content="Architettura">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Architettura</span><span class="sep">/</span>
+        <span>Multi-tenancy</span>
+      </div>
+
+      <h1>Multi-tenancy</h1>
+
+      <p>
+        TrainerHub è multi-tenant: ogni trainer (palestra) ha il suo spazio isolato dentro lo
+        <strong>stesso database condiviso</strong>. L'isolamento è garantito da una combinazione di
+        tre meccanismi che lavorano in sequenza: identificazione del tenant dal path,
+        inizializzazione del contesto, e global scope automatico sulle query.
+      </p>
+
+      <h2 id="approccio">Approccio: single-database con discriminante</h2>
+      <p>
+        Tutti i tenant condividono un <strong>solo database MySQL</strong>. Ogni tabella
+        tenant-scoped porta una colonna <code>tenant_id</code> che identifica il proprietario delle
+        righe. La libreria <strong><a href="https://tenancyforlaravel.com/">stancl/tenancy v3</a></strong>
+        gestisce identificazione, scoping e ciclo di vita.
+      </p>
+      <p>
+        La scelta single-database è esplicita: <code>DatabaseTenancyBootstrapper</code> è
+        <strong>disabilitata</strong> in <code>config/tenancy.php</code>. Restano attivi i
+        bootstrapper per cache, filesystem e queue, che restano "tenant-aware" senza dover spostare
+        i dati su database separati.
+      </p>
+
+      <pre><code>// config/tenancy.php
+'bootstrappers' =&gt; [
+    // DatabaseTenancyBootstrapper disabilitato — usiamo single-database mode
+    // Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
+    Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
+    Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
+    Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
+],</code></pre>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>stancl/tenancy supporta anche multi-database. Il vantaggio dell'approccio
+          single-database è la semplicità operativa (una sola migrazione, un solo backup, una sola
+          connessione). Se un tenant cresce molto, è possibile migrarlo su un DB dedicato senza
+          riscrivere il codice applicativo.</p></div>
+      </div>
+
+      <h2 id="identificazione">Identificazione: path-based</h2>
+      <p>
+        Le route tenant vivono sotto il prefisso <code>app/{tenant}</code>. Il middleware
+        <code>Stancl\Tenancy\Middleware\InitializeTenancyByPath</code> legge il parametro
+        <code>{tenant}</code>, cerca il tenant corrispondente e inizializza il contesto.
+      </p>
+      <p>
+        La chiave del tenant è lo <strong>slug</strong>, non l'ID: il modello
+        <code>App\Models\Tenant</code> override <code>getTenantKeyName()</code> per ritornare
+        <code>'slug'</code>. Quindi gli URL sono leggibili: <code>/app/palestra-rossi/students</code>
+        invece di <code>/app/9f3a-…-uuid/students</code>.
+      </p>
+
+      <pre><code>// app/Models/Tenant.php
+class Tenant extends BaseTenant
+{
+    public function getTenantKeyName(): string
+    {
+        return 'slug';
+    }
+}</code></pre>
+
+      <h2 id="stack-middleware">Stack middleware delle route tenant</h2>
+      <p>
+        L'ordine dei middleware è critico. Da <code>routes/tenant.php</code>:
+      </p>
+      <pre><code>Route::middleware(['web', 'auth', InitializeTenancyByPath::class, 'tenant.access'])
+    -&gt;prefix('app/{tenant}')
+    -&gt;group(function () {
+        // ...route tenant
+    });</code></pre>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Pipeline di una richiesta tenant</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+flowchart LR
+  R["Request<br/>/app/palestra-rossi/students"] --> W[web]
+  W --> A[auth<br/>utente loggato?]
+  A --> I["InitializeTenancyByPath<br/>slug → tenant?"]
+  I --> T["tenant.access<br/>owner_id == user_id?"]
+  T --> C[Controller]
+  A -. 401 .-> R
+  I -. "TenantCouldNot<br/>BeIdentified" .-> X1[404]
+  T -. "owner mismatch" .-> X2[403]
+</pre>
+        </div>
+      </div>
+
+      <ol>
+        <li><strong><code>web</code></strong> — sessione, CSRF, cookies, <code>HandleInertiaRequests</code>.</li>
+        <li><strong><code>auth</code></strong> — l'utente <em>deve</em> essere loggato prima di passare oltre.</li>
+        <li><strong><code>InitializeTenancyByPath</code></strong> — risolve <code>{tenant}</code> dallo slug e popola la facade <code>tenant()</code>. Se non trova nulla, lancia <code>TenantCouldNotBeIdentifiedByPathException</code> → mappata a <code>404</code> da <code>bootstrap/app.php</code>.</li>
+        <li><strong><code>tenant.access</code></strong> — alias del custom middleware <code>EnsureTenantAccess</code>: verifica che l'utente autenticato sia il proprietario del tenant; altrimenti <code>abort(403)</code>.</li>
+      </ol>
+
+      <pre><code>// app/Http/Middleware/EnsureTenantAccess.php
+public function handle(Request $request, Closure $next)
+{
+    $tenant = tenant();
+
+    if (! $tenant || $tenant-&gt;owner_id !== $request-&gt;user()-&gt;id) {
+        abort(403);
+    }
+
+    return $next($request);
+}</code></pre>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Oggi solo l'<strong>owner</strong> del tenant può accedere. Quando aggiungeremo
+          team members o ruoli, l'unico file da estendere è <code>EnsureTenantAccess</code> — il
+          resto della pipeline resta uguale.</p></div>
+      </div>
+
+      <h2 id="scope">Global scope automatico</h2>
+      <p>
+        Una volta inizializzato il tenant, ogni modello tenant-scoped applica automaticamente un
+        filtro <code>WHERE tenant_id = ?</code> a tutte le query <em>e</em> assegna
+        <code>tenant_id</code> in fase di creazione. Il merito è del trait
+        <code>Stancl\Tenancy\Database\Concerns\BelongsToTenant</code>.
+      </p>
+      <p>I modelli che lo usano:</p>
+      <table>
+        <thead><tr><th>Modello</th><th>Trait</th></tr></thead>
+        <tbody>
+          <tr><td><code>Student</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>Group</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>GroupStudent</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>MonthlyFee</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>EnrollmentFee</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>Payment</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>Document</code></td><td>BelongsToTenant</td></tr>
+          <tr><td><code>EmergencyContact</code></td><td>BelongsToTenant</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Modelli <em>centrali</em> (<code>User</code>, <code>Tenant</code>) <strong>non</strong>
+        usano il trait: vivono fuori dal contesto tenant. Anche una migrazione che aggiunge nuove
+        tabelle tenant-scoped deve includere <code>$table-&gt;uuid('tenant_id')-&gt;index()</code>.
+      </p>
+
+      <h2 id="garanzie">Garanzie e responsabilità</h2>
+      <p>Il global scope ti protegge da letture indesiderate, ma <strong>non da tutto</strong>.</p>
+      <ul>
+        <li>
+          <strong>Cosa il trait fa per te.</strong> Filtra automaticamente le query
+          <code>Model::all()</code>, <code>Model::find($id)</code>, <code>$tenant-&gt;students</code>:
+          un tenant non vede MAI righe di altri tenant. Alla creazione, popola
+          <code>tenant_id</code> con quello corrente.
+        </li>
+        <li>
+          <strong>Cosa <em>tu</em> devi fare.</strong> Aggiungere una <strong>Policy</strong> a
+          ogni modello tenant-scoped (vedi <a data-href="http/policy.html">Policy &amp;
+          authorization</a>): il global scope blocca le query, ma le Policy aggiungono un
+          secondo livello di controllo sull'azione richiesta. Per file path costruiti dall'utente,
+          prefissa sempre con <code>tenants/{tenant_id}/</code>.
+        </li>
+        <li>
+          <strong>Test obbligatorio.</strong> Per ogni feature tenant scrivi un Pest test che
+          dimostri l'isolamento: crea tenant A e B, esegui l'azione come A, verifica che B non
+          veda né tocchi nulla.
+        </li>
+      </ul>
+
+      <h2 id="frontend-tenant">Frontend: il tenant condiviso via Inertia</h2>
+      <p>
+        Il middleware <code>HandleInertiaRequests</code> condivide il tenant corrente con il
+        frontend, in modo che ogni pagina React abbia accesso a name/slug. Lato client, l'hook
+        <code>useTenant()</code> in <code>resources/js/hooks/use-tenant.ts</code> lo legge dalle
+        shared props di Inertia.
+      </p>
+
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>MAI accedere a dati tenant senza passare dal global scope. Non usare
+          <code>DB::table('students')</code> raw o disabilitare lo scope con
+          <code>withoutGlobalScopes()</code> a meno che tu non stia facendo manutenzione cross-tenant
+          esplicita (e in quel caso documenta perché).</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

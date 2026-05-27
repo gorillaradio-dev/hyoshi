@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Branch strategy · TrainerHub</title>
+<meta name="description" content="main = trunk attivo + deploy a staging; production = deploy prod (futuro); workflow PR.">
+<meta name="doc-title" content="Branch strategy">
+<meta name="doc-section" content="Operazioni">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Operazioni</span><span class="sep">/</span>
+        <span>Branch strategy</span>
+      </div>
+
+      <h1>Branch strategy</h1>
+
+      <p>
+        TrainerHub adotta il modello a <strong>singolo trunk + branch di release</strong>:
+        <code>main</code> è il branch attivo dove confluisce tutto il lavoro e da cui parte il
+        deploy a staging; <code>production</code> è il branch dedicato al futuro deploy di
+        produzione. Le PR vanno sempre verso <code>main</code>.
+      </p>
+
+      <h2 id="branches">I branch</h2>
+      <table>
+        <thead><tr><th>Branch</th><th>Ruolo</th><th>Deploy</th></tr></thead>
+        <tbody>
+          <tr><td><code>main</code></td><td>Default GitHub. Trunk attivo dove arrivano le PR.</td><td>Auto-deploy a <code>hyoshi-staging</code> (vedi <a data-href="operazioni/deploy.html">Deploy</a>)</td></tr>
+          <tr><td><code>production</code></td><td>Dedicato al deploy di produzione.</td><td>Nessun deploy attivo (server prod non ancora esistente)</td></tr>
+          <tr><td><code>staging</code></td><td><strong>Legacy congelato.</strong> Da eliminare dopo periodo di osservazione (issue <a href="https://github.com/gorillaradio-dev/hyoshi/issues/15">hyoshi#15</a>)</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="storia">Perché questo modello</h2>
+      <p>
+        Storicamente le PR venivano mergiate in <code>staging</code> perché lì viveva il deploy
+        automatico. Conseguenza fastidiosa: <strong>i closing keywords</strong>
+        (<code>Closes #N</code> nelle PR) <strong>non chiudevano le issue</strong>, perché
+        GitHub li onora solo sul default branch.
+      </p>
+      <p>
+        Il 2026-05-27 abbiamo realineato: <code>main</code> diventa il trunk attivo (e default
+        branch — lo era già), <code>production</code> nasce per il futuro deploy prod,
+        <code>staging</code> resta congelato. Vedi PR
+        <a href="https://github.com/gorillaradio-dev/hyoshi/pull/14">hyoshi#14</a>.
+      </p>
+
+      <h2 id="workflow-pr">Workflow di una PR</h2>
+      <ol>
+        <li>
+          <strong>Branch dal trunk.</strong> Partendo da <code>main</code> aggiornato:
+          <pre><code>git checkout main
+git pull
+git checkout -b feature/&lt;descrizione-breve&gt;</code></pre>
+        </li>
+        <li>
+          <strong>Lavora a commit piccoli e tematici.</strong> Conventional commits consigliato
+          (<code>feat:</code>, <code>fix:</code>, <code>refactor:</code>, <code>docs:</code>,
+          <code>chore:</code>, <code>test:</code>).
+        </li>
+        <li>
+          <strong>Push e PR verso <code>main</code>.</strong> Nel body della PR usa
+          <code>Closes #N</code> per le issue chiuse — ora funziona.
+        </li>
+        <li>
+          <strong>CI verde obbligatoria.</strong> <code>tests.yml</code> + <code>lint.yml</code> devono passare.
+        </li>
+        <li>
+          <strong>Review</strong> (umana, e/o automatica via <code>claude-code-review.yml</code>).
+        </li>
+        <li>
+          <strong>Merge in <code>main</code></strong> → <code>deploy.yml</code> deploya a staging
+          automaticamente.
+        </li>
+      </ol>
+
+      <h2 id="naming-branch">Naming dei branch</h2>
+      <p>
+        Convenzioni convenzionali (non automatizzate ma seguite):
+      </p>
+      <table>
+        <thead><tr><th>Prefisso</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td><code>feature/</code></td><td>Nuove funzionalità</td></tr>
+          <tr><td><code>fix/</code></td><td>Bug fix</td></tr>
+          <tr><td><code>refactor/</code></td><td>Cambi che non modificano il comportamento</td></tr>
+          <tr><td><code>chore/</code></td><td>Manutenzione (deps, config, tooling)</td></tr>
+          <tr><td><code>docs/</code></td><td>Solo documentazione</td></tr>
+          <tr><td><code>test/</code></td><td>Solo test (aggiunte, refactor copertura)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="git-rules">Regole git non negoziabili</h2>
+      <ul>
+        <li>
+          <strong>Mai rebase per integrare upstream.</strong> Usa <code>git merge origin/main</code>
+          per rinfrescare il tuo feature branch. Niente force-push, niente conflitti
+          per-commit dolorosi.
+        </li>
+        <li>
+          <strong>Mai push diretto a <code>main</code></strong> (salvo emergenze concordate). Sempre PR.
+        </li>
+        <li>
+          <strong>Squash o merge commit?</strong> Default <strong>merge commit</strong>: il
+          merge della PR genera un commit di merge con riferimento alla PR. Squash solo per PR
+          molto piccole e atomiche.
+        </li>
+        <li>
+          <strong>Body PR descrittivo.</strong> "Cosa cambia e perché", non solo "what". Per
+          cambi non banali, includi una sezione "Test plan" o "Punti di attenzione".
+        </li>
+      </ul>
+
+      <h2 id="hotfix">Hotfix in staging (futuro: anche in production)</h2>
+      <p>
+        Quando arriverà un server di produzione, un hotfix urgente seguirà:
+      </p>
+      <ol>
+        <li>Branch da <code>production</code>: <code>git checkout -b hotfix/&lt;...&gt; production</code></li>
+        <li>PR verso <code>production</code> (NOT <code>main</code>), CI verde, merge.</li>
+        <li>Deploy automatico a prod (workflow da configurare).</li>
+        <li>Mergia <code>production</code> in <code>main</code> per non perdere l'hotfix sul trunk.</li>
+      </ol>
+      <p>
+        Per ora, ogni cambio passa da <code>main</code> e va in staging.
+      </p>
+
+      <h2 id="closing-keywords">Closing keywords</h2>
+      <p>
+        Nel body della PR puoi scrivere:
+      </p>
+      <pre><code>Closes #42
+Fixes #15, #16
+Resolves #99</code></pre>
+      <p>
+        Al merge in <code>main</code> (il default branch), GitHub chiude automaticamente quelle
+        issue. <strong>Questo era il problema originale del modello precedente</strong> e ora è
+        risolto.
+      </p>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Per i cloni locali del team: dopo il realignment del 2026-05-27, fare
+          <code>git fetch &amp;&amp; git checkout main &amp;&amp; git pull</code>. Worktree o
+          branch locali che tracciavano <code>staging</code> possono essere eliminati.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

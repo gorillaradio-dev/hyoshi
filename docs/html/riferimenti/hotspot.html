@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotspot di complessità · TrainerHub</title>
+<meta name="description" content="Aree del codice da affrontare con cautela: controller centrali, service quote, casi limite denaro.">
+<meta name="doc-title" content="Hotspot di complessità">
+<meta name="doc-section" content="Riferimenti">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Riferimenti</span><span class="sep">/</span>
+        <span>Hotspot di complessità</span>
+      </div>
+
+      <h1>Hotspot di complessità</h1>
+
+      <p>
+        Non tutti i file del progetto sono uguali. Alcuni concentrano molta logica, vincoli o
+        state-of-art di scelte già fatte; modificarli a cuor leggero produce regressioni difficili
+        da diagnosticare. Questa pagina è una <strong>mappa degli hotspot</strong>: quando tocchi
+        questi file, fai attenzione in più (e accompagna con test).
+      </p>
+
+      <div class="callout warn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div><p>Regola: per <strong>ogni</strong> modifica a un file in questa lista, accompagna
+          con (a) un test che dimostri il nuovo comportamento, e (b) verifica che i test esistenti
+          continuino a passare. Niente eccezioni.</p></div>
+      </div>
+
+      <h2 id="dominio-denaro">Il dominio del denaro</h2>
+      <p>
+        Il cluster più sottile del progetto. Errori qui costano <em>davvero</em> — letteralmente.
+      </p>
+
+      <h3 id="monthly-service"><code>app/Services/MonthlyFeeService.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> calcolo dei periodi scoperti basato su un'ancora
+          temporale, gestione clamping per mesi corti (febbraio), FIFO sui pagamenti, estensione
+          nel futuro per pagamenti anticipati.</li>
+        <li><strong>Pattern da rispettare:</strong> mai modificare la firma o l'ordine FIFO
+          senza aggiornare <code>PaymentEdgeCasesTest</code>. Mai chiamare metodi del service
+          senza un tenant inizializzato.</li>
+        <li><strong>Test di riferimento:</strong> <code>tests/Feature/Tenant/PaymentEdgeCasesTest.php</code>,
+          <code>tests/Unit/Services/MonthlyFeeServiceTest.php</code>.</li>
+        <li><strong>Approfondimento:</strong> <a data-href="dominio/quote-pagamenti.html">Quote
+          mensili e pagamenti</a>.</li>
+      </ul>
+
+      <h3 id="enrollment-service"><code>app/Services/EnrollmentFeeService.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> il <code>hasValidEnrollment</code> è il "segnale" che
+          determina lo stato <code>Active</code> vs <code>Pending</code> dello studente
+          (<code>Student::effectiveStatus</code>). Cambiare la logica modifica lo stato visibile
+          di TUTTI gli allievi.</li>
+        <li><strong>Pattern da rispettare:</strong> il rinnovo anticipato deve sempre partire
+          dalla <code>expires_at</code> dell'ultima iscrizione valida, non da
+          <code>today()</code>.</li>
+        <li><strong>Test di riferimento:</strong>
+          <code>tests/Unit/Services/EnrollmentFeeServiceTest.php</code>,
+          <code>tests/Feature/Tenant/StudentLifecycleTest.php</code>.</li>
+        <li><strong>Approfondimento:</strong> <a data-href="dominio/iscrizioni.html">Iscrizioni</a>.</li>
+      </ul>
+
+      <h3 id="fee-calculation"><code>app/Services/FeeCalculationService.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> determina la tariffa effettiva (override → minimo
+          gruppi) e il saldo. È usato ovunque venga calcolato un importo.</li>
+        <li><strong>Pattern da rispettare:</strong> non cambiare la regola <em>"min tra i gruppi"</em>
+          senza prima chiedere — è una scelta di prodotto, non di codice.</li>
+        <li><strong>Test di riferimento:</strong> <code>tests/Unit/Services/FeeCalculationServiceTest.php</code>.</li>
+      </ul>
+
+      <h2 id="controller-centrali">Controller centrali</h2>
+
+      <h3 id="student-controller"><code>app/Http/Controllers/Tenant/StudentController.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> è il controller con il maggior numero di azioni
+          (CRUD, search, suspend/reactivate, filtri di stato complessi).</li>
+        <li><strong>Pattern da rispettare:</strong> sempre <code>$this-&gt;authorize(...)</code>
+          come prima riga; sempre validazione in <code>StoreStudentRequest</code>/<code>UpdateStudentRequest</code>;
+          mai business logic inline (delega ai service).</li>
+        <li><strong>Approfondimento:</strong> <a data-href="http/controller.html">Controller &amp;
+          FormRequest</a>.</li>
+      </ul>
+
+      <h2 id="frontend-pesanti">Componenti frontend pesanti</h2>
+
+      <h3 id="student-show"><code>resources/js/pages/Tenant/Student/Show.tsx</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> pagina con tab, multiple azioni (suspend, edit, register
+          payment, register enrollment), tante card.</li>
+        <li><strong>Pattern da rispettare:</strong> ogni nuova azione passa da
+          <code>useForm</code>; ogni dialog usa shadcn <code>Dialog</code>; mai stato globale
+          (Zustand/Redux) per dati che dovrebbero venire dalle props Inertia.</li>
+      </ul>
+
+      <h3 id="student-index"><code>resources/js/pages/Tenant/Student/Index.tsx</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> tabella con filtri persistiti via URL, badge quote
+          scoperte calcolate batch, pagamento rapido inline.</li>
+        <li><strong>Pattern da rispettare:</strong> ogni filtro deve essere riflesso nel
+          querystring (refresh-safe); il pagamento rapido non deve perdere stato della pagina
+          (usare <code>preserveScroll</code>).</li>
+      </ul>
+
+      <h3 id="student-form"><code>resources/js/components/student-form.tsx</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> form complesso con contatti d'emergenza dinamici e
+          conversione euro→centesimi.</li>
+        <li><strong>Pattern da rispettare:</strong> la conversione monetaria avviene LATO SERVER
+          in <code>prepareForValidation</code>; il form lato client invia l'euro decimale.</li>
+      </ul>
+
+      <h3 id="app-header"><code>resources/js/components/app-header.tsx</code> ·
+        <code>two-factor-setup-modal.tsx</code></h3>
+      <ul>
+        <li><strong>Perché caldi:</strong> chrome di navigazione e setup 2FA — UI complesse con
+          molti stati e branch.</li>
+      </ul>
+
+      <h2 id="config-critiche">Configurazioni critiche</h2>
+
+      <h3 id="config-tenancy"><code>config/tenancy.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> definisce bootstrappers, identification, central
+          domains. Un'errata configurazione può rompere l'isolamento tenant.</li>
+        <li><strong>Cosa NON toccare:</strong> non riabilitare <code>DatabaseTenancyBootstrapper</code>
+          senza un piano di migrazione esplicito (oggi siamo single-DB, è una scelta).</li>
+      </ul>
+
+      <h3 id="config-fortify"><code>config/fortify.php</code> · <code>config/session.php</code></h3>
+      <ul>
+        <li><strong>Perché caldi:</strong> auth, 2FA, sessioni. Modifiche sbagliate possono fare
+          loggare gli utenti fuori in massa o aprire buchi di sicurezza.</li>
+      </ul>
+
+      <h3 id="bootstrap-app"><code>bootstrap/app.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> registra middleware, mappa <code>tenant.access</code>,
+          carica <code>routes/tenant.php</code>, mappa eccezioni tenancy a 404.</li>
+        <li><strong>Cosa NON toccare:</strong> l'ordine dei middleware globali
+          (<code>HandleAppearance</code> → <code>HandleInertiaRequests</code> →
+          <code>AddLinkHeadersForPreloadedAssets</code>).</li>
+      </ul>
+
+      <h2 id="ci-cd-hotspot">CI/CD</h2>
+
+      <h3 id="deploy-yml"><code>.github/workflows/deploy.yml</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> ogni modifica triggererà un deploy. Una sintassi
+          sbagliata o una sequenza errata può rompere la prossima release.</li>
+        <li><strong>Pattern da rispettare:</strong> nessun <code>sudo</code> nello script (vedi
+          memory <code>feedback_no_sudo_deploy</code>); il retry build 3x esiste perché Wayfinder
+          può fallire la prima generazione.</li>
+      </ul>
+
+      <h2 id="test-hotspot">Test hotspot</h2>
+
+      <h3 id="payment-edge"><code>tests/Feature/Tenant/PaymentEdgeCasesTest.php</code></h3>
+      <ul>
+        <li><strong>Perché caldo:</strong> non è il codice produttivo, ma è la <strong>fonte di
+          verità</strong> sui casi limite del denaro. Se aggiungi un edge case nuovo, aggiungilo
+          qui.</li>
+        <li><strong>Cosa NON fare:</strong> cancellare un test "perché tanto non capita". Cancella
+          solo se il comportamento testato non è più valido — e in quel caso documenta perché nel
+          messaggio di commit.</li>
+      </ul>
+
+      <h2 id="dove-iniziare">Se sei nuovo, da dove cominciare</h2>
+      <p>
+        Non leggere gli hotspot per primi. Inizia da:
+      </p>
+      <ol>
+        <li><a data-href="overview.html">Panoramica</a> e <a data-href="architettura.html">Architettura</a></li>
+        <li><a data-href="architettura/multi-tenancy.html">Multi-tenancy</a></li>
+        <li><a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a></li>
+        <li><a data-href="http/controller.html">Controller &amp; FormRequest</a></li>
+      </ol>
+      <p>
+        Solo dopo, quando devi davvero metterci mano, torna qui per ricordarti dove guardare con
+        cautela.
+      </p>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup locale · TrainerHub</title>
+<meta name="description" content="Da clone a app funzionante: dipendenze, DB, migrate, seed, asset, primo tenant.">
+<meta name="doc-title" content="Setup locale">
+<meta name="doc-section" content="Operazioni">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Operazioni</span><span class="sep">/</span>
+        <span>Setup locale</span>
+      </div>
+
+      <h1>Setup locale</h1>
+
+      <p>
+        Procedura per portare il progetto da <em>git clone</em> a <em>app funzionante in
+        locale</em>. Tempo realistico: ~10 minuti se hai già tutti i prerequisiti, ~20-30 se devi
+        installarli.
+      </p>
+
+      <h2 id="prerequisiti">Prerequisiti</h2>
+      <ul>
+        <li><strong>PHP 8.3+</strong> (preferito 8.4, allineato a CI/deploy)</li>
+        <li><strong>Composer 2.x</strong></li>
+        <li><strong>Node 22+</strong> con <strong>npm</strong></li>
+        <li><strong>MySQL 8</strong> locale, utente <code>root</code> senza password</li>
+        <li><strong>Git</strong> con accesso a <a href="https://github.com/gorillaradio-dev/hyoshi">gorillaradio-dev/hyoshi</a></li>
+      </ul>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Su macOS: <code>brew install php@8.4 composer node@22 mysql@8.0</code>. Su Linux:
+          usa il package manager della distro o <code>mise</code>/<code>asdf</code> per gestire
+          versioni multiple.</p></div>
+      </div>
+
+      <h2 id="clone">1. Clone</h2>
+      <pre><code>git clone git@github.com:gorillaradio-dev/hyoshi.git trainer-hub
+cd trainer-hub</code></pre>
+      <p>
+        Il default branch è <code>main</code>. Vedi
+        <a data-href="operazioni/branch-strategy.html">Branch strategy</a> per la divisione tra
+        <code>main</code> (trunk attivo + deploy a staging) e <code>production</code> (deploy
+        futuro).
+      </p>
+
+      <h2 id="database">2. Database</h2>
+      <p>
+        Crea il database MySQL <code>trainerhub</code>. La connessione di default
+        (<code>.env.example</code>) usa <code>root</code> senza password:
+      </p>
+      <pre><code>mysql -uroot -e 'CREATE DATABASE trainerhub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'</code></pre>
+
+      <h2 id="setup-script">3. Setup automatico</h2>
+      <p>
+        Lo script <code>composer setup</code> fa tutto il lavoro pesante in un comando:
+      </p>
+      <pre><code>composer setup</code></pre>
+      <p>Equivale a:</p>
+      <pre><code>composer install
+cp .env.example .env       # se non esiste già
+php artisan key:generate
+php artisan migrate --force
+npm install
+npm run build</code></pre>
+
+      <p>
+        Dopo questo passo hai: dipendenze installate, <code>.env</code> con
+        <code>APP_KEY</code>, schema DB aggiornato, asset frontend buildati.
+      </p>
+
+      <h2 id="env">4. <code>.env</code> minimo</h2>
+      <p>
+        Apri <code>.env</code> e verifica/sovrascrivi i campi DB se non usi i default:
+      </p>
+      <pre><code>APP_NAME=TrainerHub
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=trainerhub
+DB_USERNAME=root
+DB_PASSWORD=</code></pre>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Non servono variabili Stripe per il setup base: il billing (Cashier) è predisposto
+          ma non ancora attivo. Lo configurerai quando avvieremo lo Sprint 2.</p></div>
+      </div>
+
+      <h2 id="dev">5. Avvia l'ambiente di sviluppo</h2>
+      <pre><code>composer dev</code></pre>
+      <p>
+        Lancia in parallelo (con <code>concurrently</code>):
+      </p>
+      <ul>
+        <li><code>php artisan serve</code> — backend su <code>http://localhost:8000</code></li>
+        <li><code>php artisan queue:listen</code> — worker queue</li>
+        <li><code>php artisan pail</code> — tail dei log applicativi</li>
+        <li><code>npm run dev</code> — Vite dev server con HMR</li>
+      </ul>
+
+      <p>Output colorato, ogni processo ha il suo nome. <code>Ctrl+C</code> ferma tutto.</p>
+
+      <h2 id="primo-tenant">6. Crea il primo tenant</h2>
+      <p>
+        Apri <code>http://localhost:8000</code>, registrati (la registrazione Fortify è attiva di
+        default), accedi. Verrai reindirizzato a <code>/onboarding</code> dove crei il tuo primo
+        tenant — uno slug univoco per il "nome palestra".
+      </p>
+      <p>
+        Dopo l'onboarding sarai su <code>/app/{slug}/dashboard</code>. Da qui hai accesso a:
+        Allievi, Gruppi, Pagamenti.
+      </p>
+
+      <h2 id="comandi-utili">Comandi utili</h2>
+      <table>
+        <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+        <tbody>
+          <tr><td><code>composer dev</code></td><td>Avvia backend, queue, pail, vite</td></tr>
+          <tr><td><code>composer test</code></td><td>Lint Pint + suite Pest</td></tr>
+          <tr><td><code>composer ci:check</code></td><td>Tutto ciò che gira in CI (lint, types, test)</td></tr>
+          <tr><td><code>php artisan migrate:fresh</code></td><td>Resetta DB (cancella tutto) e rigira migrate</td></tr>
+          <tr><td><code>php artisan tinker</code></td><td>REPL interattivo Laravel</td></tr>
+          <tr><td><code>php artisan route:list --path=app</code></td><td>Elenco route tenant</td></tr>
+          <tr><td><code>npm run lint</code></td><td>ESLint con autofix</td></tr>
+          <tr><td><code>npm run format</code></td><td>Prettier su <code>resources/</code></td></tr>
+          <tr><td><code>npm run types:check</code></td><td><code>tsc --noEmit</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="reset">Reset completo</h2>
+      <p>
+        Se vuoi ricominciare da zero (DB pulito, niente tenant, niente dati):
+      </p>
+      <pre><code>php artisan migrate:fresh
+# poi rifai il flusso di registrazione + onboarding</code></pre>
+
+      <h2 id="testing-mobile">Testing mobile</h2>
+      <p>
+        Per testare dal telefono col dev server: <code>docs/mobile-testing.md</code> spiega come
+        esporre <code>php artisan serve</code> in LAN (<code>--host=0.0.0.0</code>) e configurare
+        Vite per HMR via rete.
+      </p>
+
+      <h2 id="problemi">Problemi comuni</h2>
+      <ul>
+        <li><strong>"Class not found" dopo pull</strong> → <code>composer dump-autoload</code>.</li>
+        <li><strong>500 dopo aggiornamento</strong> → <code>php artisan optimize:clear</code>.</li>
+        <li><strong>Vite non hot-reloada</strong> → riavvia <code>composer dev</code> (a volte il watch perde i file).</li>
+        <li><strong>Lint fallisce su file generati Wayfinder</strong> → <code>resources/js/actions/**</code> e <code>resources/js/routes/**</code> sono già in <code>eslint.config.js</code> ignores; se vedi errori lì, hai pulito la cache Wayfinder e il rebuild Vite ne ha rigenerati di nuovi — riavvia <code>npm run dev</code>.</li>
+        <li><strong>"SQLSTATE access denied"</strong> → controlla che MySQL accetti <code>root</code> senza password (default su <code>brew install mysql</code> con <code>brew services start mysql</code>).</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

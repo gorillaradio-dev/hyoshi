@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convenzioni frontend · TrainerHub</title>
+<meta name="description" content="TypeScript senza any, useForm di Inertia, shadcn obbligatorio, mobile-first.">
+<meta name="doc-title" content="Convenzioni frontend">
+<meta name="doc-section" content="Frontend">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Frontend</span><span class="sep">/</span>
+        <span>Convenzioni frontend</span>
+      </div>
+
+      <h1>Convenzioni frontend</h1>
+
+      <p>
+        Le regole frontend di TrainerHub sono <strong>non negoziabili</strong>: derivano da
+        esperienze costose. Niente "ma in questo caso fa eccezione". Se la regola sembra di
+        troppo, prima cerca un modo per rispettarla — solo dopo discutila con il team.
+      </p>
+
+      <p>La fonte di verità di queste convenzioni è <code>CLAUDE.md</code> nella radice del repo.</p>
+
+      <h2 id="typescript">TypeScript: zero compromessi</h2>
+      <ul>
+        <li><strong>Mai <code>any</code></strong>. Se non sai il tipo, usa <code>unknown</code> e narrowla.</li>
+        <li><strong>Mai <code>!</code></strong> (non-null assertion). Risolvi con guard espliciti.</li>
+        <li><strong>Mai <code>as</code> unsafe</strong>. Usa generics, type guard, helper tipizzati.</li>
+        <li>Se TypeScript si lamenta, risolvi <strong>alla radice</strong>: hook custom che ritorna il tipo giusto, predicato di type guard, props meglio definite. Non zittire il compilatore.</li>
+      </ul>
+
+      <p>Esempio cattivo (proibito):</p>
+      <pre><code>// ❌ NO
+const student = props.student as Student;
+const phone = student.phoneContact!.phone;</code></pre>
+
+      <p>Esempio buono:</p>
+      <pre><code>// ✅ OK
+interface ShowProps { student: Student; }
+
+export default function Show({ student }: ShowProps) {
+    const phone = student.phoneContact?.phone ?? student.phone ?? '—';
+    // ...
+}</code></pre>
+
+      <h2 id="path">Path imports: mai relativi profondi</h2>
+      <p>
+        Usa il path alias <code>@/</code> (configurato in <code>tsconfig.json</code> →
+        <code>resources/js/</code>). I <code>../../</code> sono vietati.
+      </p>
+      <pre><code>// ❌ NO
+import { useTenant } from '../../hooks/use-tenant';
+
+// ✅ OK
+import { useTenant } from '@/hooks/use-tenant';</code></pre>
+
+      <h2 id="shadcn">UI: shadcn obbligatorio</h2>
+      <p>
+        Tutta la UI parte da <strong>shadcn/ui</strong>. Prima di creare un componente custom,
+        cerca su <a href="https://ui.shadcn.com/docs/components">ui.shadcn.com</a>: se esiste già,
+        usa quello. Si aggiungono al progetto con la CLI shadcn (vivono in
+        <code>resources/js/components/ui/</code>).
+      </p>
+      <ul>
+        <li><strong>Mai re-implementare</strong> Button, Input, Select, Dialog, Sheet, Tabs, Card, Table, … shadcn ce li ha.</li>
+        <li>I primitivi shadcn sono <strong>copiati</strong> nel progetto, non importati come libreria: puoi modificarli liberamente per il tuo design.</li>
+        <li>Quando shadcn non ha quello che ti serve, puoi comporre i primitivi esistenti. Solo se proprio nulla esiste, scrivi un componente custom — ma documenta perché.</li>
+      </ul>
+
+      <h2 id="form">Form: <code>useForm</code> sempre</h2>
+      <p>
+        Per ogni form usa <code>useForm</code> di Inertia. Mai <code>useState</code> + <code>fetch</code>
+        manuale: perderesti integrazione con validazione, errori, progress, ed esporresti CSRF
+        vulnerabilities.
+      </p>
+      <pre><code>// ✅ OK
+const form = useForm({ name: '', email: '' });
+form.post('/users', { onSuccess: () =&gt; form.reset() });
+
+// ❌ NO
+const [name, setName] = useState('');
+fetch('/users', { method: 'POST', body: JSON.stringify({ name }) });</code></pre>
+
+      <h2 id="props">Props: sempre interface esplicita</h2>
+      <p>
+        Ogni componente espone un'<code>interface</code> per le sue props, idealmente derivata dai
+        tipi di dominio in <code>resources/js/types/</code>.
+      </p>
+      <pre><code>// ✅ OK
+interface StudentCardProps {
+    student: Student;
+    onEdit?: (s: Student) =&gt; void;
+}
+
+export function StudentCard({ student, onEdit }: StudentCardProps) {
+    // ...
+}</code></pre>
+
+      <h2 id="layout-pattern">Layout: persistent layout pattern</h2>
+      <p>
+        Ogni pagina assegna il layout con il <code>static layout</code> property, non con un
+        wrapping JSX:
+      </p>
+      <pre><code>// ✅ OK — layout persistente
+StudentShow.layout = (page: ReactElement) =&gt; &lt;TenantLayout&gt;{page}&lt;/TenantLayout&gt;;
+
+// ❌ NO — layout dentro il return
+return &lt;TenantLayout&gt;...&lt;/TenantLayout&gt;;</code></pre>
+
+      <h2 id="hook-tenant">Tenant: <code>useTenant()</code></h2>
+      <p>
+        Non destrutturare <code>usePage().props.tenant</code> a mano: usa l'hook
+        <code>useTenant()</code> che lancia se il tenant non c'è. Previene bug subdoli sulle route
+        centrali.
+      </p>
+
+      <h2 id="mobile-first">Mobile-first</h2>
+      <p>
+        Vedi <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>. Le classi
+        Tailwind di default sono <em>mobile</em>; i modificatori <code>md:</code> e
+        <code>lg:</code> aggiungono il comportamento desktop:
+      </p>
+      <pre><code>// ✅ OK — mobile-first
+&lt;div className="flex flex-col md:flex-row"&gt;...&lt;/div&gt;
+
+// ❌ NO — desktop-first ribaltato
+&lt;div className="flex flex-row max-md:flex-col"&gt;...&lt;/div&gt;</code></pre>
+
+      <h2 id="lingua">Lingua</h2>
+      <ul>
+        <li><strong>Codice, commenti, naming:</strong> inglese.</li>
+        <li><strong>UI labels e messaggi utente:</strong> italiano.</li>
+        <li><strong>Documentazione interna:</strong> italiano (questa).</li>
+      </ul>
+
+      <h2 id="lint">Lint e formattazione</h2>
+      <p>Comandi essenziali:</p>
+      <pre><code>npm run lint       # ESLint con --fix (autofixa import order, ecc.)
+npm run lint:check # ESLint senza fix (usato in CI)
+npm run format     # Prettier --write
+npm run format:check
+npm run types:check # tsc --noEmit (verifica solo tipi, no build)</code></pre>
+
+      <p>
+        Il workflow CI <code>lint.yml</code> gira <code>npm run lint</code> ed
+        <code>npm run format</code> in <code>--check</code>. Se fallisce, gira localmente
+        <code>npm run lint &amp;&amp; npm run format</code> prima del prossimo push.
+      </p>
+
+      <h2 id="review">Review frontend</h2>
+      <p>
+        Dopo ogni blocco significativo di lavoro UI, esegui la checklist della skill
+        <code>frontend-review</code> (Claude Code). Punti chiave:
+      </p>
+      <ul>
+        <li>shadcn-first verificato (nessun componente custom riproducibile con shadcn).</li>
+        <li>Inertia-first verificato (nessun fetch manuale, useForm dove serve).</li>
+        <li>Tailwind-first (no inline styles, no CSS modules non motivati).</li>
+        <li>Mobile-first verificato (testato a 375px di larghezza minimo).</li>
+        <li>Nessun <code>any</code>/<code>!</code>/<code>as</code> introdotto.</li>
+        <li>Nessun path relativo profondo.</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routing tenant vs central · TrainerHub</title>
+<meta name="description" content="Le 4 file di route: web.php, tenant.php, settings.php, auth.php. Middleware stack tenant.">
+<meta name="doc-title" content="Routing tenant vs central">
+<meta name="doc-section" content="HTTP">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>HTTP</span><span class="sep">/</span>
+        <span>Routing tenant vs central</span>
+      </div>
+
+      <h1>Routing tenant vs central</h1>
+
+      <p>
+        Le route di TrainerHub sono divise per <strong>contesto</strong>: centrali (vivono fuori
+        dal contesto tenant), tenant (vivono dentro un tenant identificato dal path), settings
+        utente, e auth Fortify. Ogni file di route ha un middleware stack diverso e responsabilità
+        diverse — capire la divisione è il primo passo per non sbagliare dove mettere una nuova
+        rotta.
+      </p>
+
+      <h2 id="file">Le file di route</h2>
+      <table>
+        <thead><tr><th>File</th><th>Contesto</th><th>Middleware base</th></tr></thead>
+        <tbody>
+          <tr><td><code>routes/web.php</code></td><td>Central (welcome, dashboard redirect, onboarding)</td><td><code>web</code> + <code>auth</code>+<code>verified</code> per zone protette</td></tr>
+          <tr><td><code>routes/tenant.php</code></td><td>Tenant (tutto ciò che vive dentro un tenant)</td><td><code>web</code>, <code>auth</code>, <code>InitializeTenancyByPath</code>, <code>tenant.access</code></td></tr>
+          <tr><td><code>routes/settings.php</code></td><td>Settings utente (profilo, password, 2FA)</td><td><code>auth</code> (alcune <code>verified</code> + throttle)</td></tr>
+          <tr><td><code>routes/auth.php</code></td><td>Auth Fortify (login/register/2FA)</td><td>Auto-registrate da Fortify</td></tr>
+          <tr><td><code>routes/console.php</code></td><td>Comandi Artisan custom</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Il caricamento è fatto in <code>bootstrap/app.php</code>: <code>web.php</code> è la entry
+        principale e include <code>settings.php</code>; <code>tenant.php</code> viene caricato
+        nello stesso step via <code>then</code> callback.
+      </p>
+
+      <h2 id="central">Route centrali (<code>routes/web.php</code>)</h2>
+      <p>
+        Sono le route accessibili senza un tenant identificato. La logica chiave: dopo il login,
+        l'utente viene reindirizzato al tenant corrente o all'onboarding.
+      </p>
+
+      <pre><code>Route::middleware(['auth', 'verified'])-&gt;group(function () {
+    Route::get('dashboard', function () {
+        $user = auth()-&gt;user();
+        $tenant = $user-&gt;currentTenant ?? $user-&gt;tenants()-&gt;first();
+
+        if ($tenant) {
+            if ($user-&gt;current_tenant_id !== $tenant-&gt;id) {
+                $user-&gt;update(['current_tenant_id' =&gt; $tenant-&gt;id]);
+            }
+            return redirect()-&gt;route('tenant.dashboard', $tenant-&gt;slug);
+        }
+
+        return redirect()-&gt;route('onboarding.create');
+    })-&gt;name('dashboard');
+
+    Route::get('/onboarding', [OnboardingController::class, 'create'])-&gt;name('onboarding.create');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])-&gt;name('onboarding.store');
+});</code></pre>
+
+      <h2 id="tenant">Route tenant (<code>routes/tenant.php</code>)</h2>
+      <p>
+        Tutte sotto il prefisso <code>app/{tenant}</code>. Lo stack middleware è in
+        <code>['web', 'auth', InitializeTenancyByPath::class, 'tenant.access']</code> —
+        vedi <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a> per il dettaglio.
+      </p>
+
+      <h3 id="dashboard">Dashboard</h3>
+      <pre><code>GET    app/{tenant}/dashboard                  tenant.dashboard</code></pre>
+
+      <h3 id="students">Studenti</h3>
+      <pre><code>GET    app/{tenant}/students                              tenant.students.index
+GET    app/{tenant}/students/search                       tenant.students.search
+GET    app/{tenant}/students/create                       tenant.students.create
+POST   app/{tenant}/students                              tenant.students.store
+GET    app/{tenant}/students/{student}                    tenant.students.show
+GET    app/{tenant}/students/{student}/edit               tenant.students.edit
+PUT    app/{tenant}/students/{student}                    tenant.students.update
+DELETE app/{tenant}/students/{student}                    tenant.students.destroy
+PUT    app/{tenant}/students/{student}/suspend            tenant.students.suspend
+PUT    app/{tenant}/students/{student}/reactivate         tenant.students.reactivate</code></pre>
+
+      <h3 id="groups">Gruppi</h3>
+      <pre><code>GET    app/{tenant}/groups                                tenant.groups.index
+POST   app/{tenant}/groups                                tenant.groups.store
+GET    app/{tenant}/groups/create                         tenant.groups.create
+GET    app/{tenant}/groups/{group}                        tenant.groups.show
+GET    app/{tenant}/groups/{group}/edit                   tenant.groups.edit
+PUT    app/{tenant}/groups/{group}                        tenant.groups.update
+DELETE app/{tenant}/groups/{group}                        tenant.groups.destroy</code></pre>
+
+      <h3 id="studenti-gruppi">Studenti ↔ Gruppi</h3>
+      <pre><code>POST   app/{tenant}/students/{student}/groups             tenant.students.groups.attach
+DELETE app/{tenant}/students/{student}/groups/{group}     tenant.students.groups.detach</code></pre>
+
+      <h3 id="pagamenti">Pagamenti</h3>
+      <pre><code>GET    app/{tenant}/students/{student}/payment-data       tenant.students.payment-data
+POST   app/{tenant}/students/{student}/payments/monthly   tenant.students.payments.monthly
+POST   app/{tenant}/students/{student}/payments/enrollment tenant.students.payments.enrollment</code></pre>
+
+      <h2 id="settings">Settings utente (<code>routes/settings.php</code>)</h2>
+      <p>
+        Profilo, password e 2FA — gestiti da controller in <code>app/Http/Controllers/Settings/</code>.
+        Sono utente-scoped, non tenant-scoped: stesso utente, indipendentemente dal tenant corrente.
+      </p>
+      <pre><code>GET   settings/profile          profile.edit
+PATCH settings/profile          profile.update
+DELETE settings/profile         profile.destroy
+GET   settings/password         user-password.edit
+PUT   settings/password         user-password.update   (throttle:6,1)
+GET   settings/appearance       appearance.edit
+GET   settings/two-factor       two-factor.show</code></pre>
+
+      <h2 id="auth">Auth (<code>routes/auth.php</code>)</h2>
+      <p>
+        Le route di autenticazione sono registrate <strong>automaticamente</strong> da Laravel
+        Fortify in base ai <code>features</code> abilitati in <code>config/fortify.php</code>:
+        login, registrazione, password reset, email verification, 2FA. Non vivono in un file
+        custom — non aggiungerle a mano.
+      </p>
+
+      <h2 id="naming">Convenzioni naming</h2>
+      <ul>
+        <li><strong>Tenant route names:</strong> sempre <code>tenant.*</code> (es.
+          <code>tenant.students.index</code>, <code>tenant.students.payments.monthly</code>).</li>
+        <li><strong>Central route names:</strong> <code>dashboard</code>, <code>onboarding.*</code>,
+          <code>profile.*</code>, <code>two-factor.*</code> senza prefisso.</li>
+        <li><strong>Route model binding:</strong> implicit (<code>{student}</code> →
+          <code>App\Models\Student</code>); il global scope tenant rende il binding
+          automaticamente tenant-safe.</li>
+      </ul>
+
+      <div class="callout tip">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <div><p>Lato frontend, le route sono generate via <strong>Laravel Wayfinder</strong>: il
+          plugin Vite produce un client TypeScript tipizzato in
+          <code>resources/js/routes/</code> e <code>resources/js/actions/</code>. Non importare URL
+          come stringhe nei componenti React — usa l'helper generato.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

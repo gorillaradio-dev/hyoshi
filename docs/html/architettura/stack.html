@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack tecnologico · TrainerHub</title>
+<meta name="description" content="Tecnologie usate: Laravel 12, React 19, Inertia, shadcn/ui, MySQL, stancl/tenancy, Pest.">
+<meta name="doc-title" content="Stack tecnologico">
+<meta name="doc-section" content="Architettura">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Architettura</span><span class="sep">/</span>
+        <span>Stack tecnologico</span>
+      </div>
+
+      <h1>Stack tecnologico</h1>
+
+      <p>
+        TrainerHub è costruito sul <strong>Laravel React Starter Kit</strong>: un monolite
+        full-stack con backend Laravel e frontend React resi insieme da Inertia.js. Le scelte
+        riflettono la realtà del progetto al commit corrente — versioni reali da
+        <code>composer.json</code> e <code>package.json</code>.
+      </p>
+
+      <h2 id="backend">Backend</h2>
+      <table>
+        <thead><tr><th>Tecnologia</th><th>Versione</th><th>Ruolo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>PHP</strong></td><td>^8.2 (dev 8.3/8.4, deploy 8.4)</td><td>Runtime backend; CI testa su 8.4 e 8.5.</td></tr>
+          <tr><td><strong>Laravel</strong></td><td>^12.0</td><td>Framework HTTP, routing, ORM Eloquent, queue, cache.</td></tr>
+          <tr><td><strong>stancl/tenancy</strong></td><td>^3.9</td><td>Multi-tenancy single-database con global scope e identificazione path-based.</td></tr>
+          <tr><td><strong>Laravel Fortify</strong></td><td>^1.30</td><td>Backend di autenticazione (login, registrazione, 2FA, recovery codes).</td></tr>
+          <tr><td><strong>Inertia for Laravel</strong></td><td>^2.0</td><td>Adapter server-side per Inertia: trasforma le response in pagine React.</td></tr>
+          <tr><td><strong>Laravel Wayfinder</strong></td><td>^0.1.9</td><td>Genera client TypeScript tipizzato delle route Laravel (Vite plugin).</td></tr>
+          <tr><td><strong>Laravel Tinker</strong></td><td>^2.10</td><td>REPL per debug interattivo.</td></tr>
+          <tr><td><strong>Laravel Pint</strong></td><td>^1.24 (dev)</td><td>Code style per PHP (preset Laravel).</td></tr>
+          <tr><td><strong>Laravel Pail</strong></td><td>^1.2 (dev)</td><td>Tail dei log applicativi in tempo reale.</td></tr>
+          <tr><td><strong>Pest</strong></td><td>^4.4 (dev)</td><td>Test runner sopra PHPUnit con plugin Laravel.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="frontend">Frontend</h2>
+      <table>
+        <thead><tr><th>Tecnologia</th><th>Versione</th><th>Ruolo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Node</strong></td><td>22 (CI)</td><td>Runtime build e dev server.</td></tr>
+          <tr><td><strong>React</strong></td><td>19.x</td><td>UI library (con React Compiler abilitato via Babel plugin).</td></tr>
+          <tr><td><strong>TypeScript</strong></td><td>via typescript-eslint ^8</td><td>Tutti i file <code>.tsx</code> sono TS. No <code>any</code>, no <code>!</code>, no <code>as</code> unsafe.</td></tr>
+          <tr><td><strong>Inertia React adapter</strong></td><td>@inertiajs/react ^2.3</td><td>Riceve le pagine dal backend, fa client-side routing.</td></tr>
+          <tr><td><strong>Tailwind CSS</strong></td><td>^4.1 (via @tailwindcss/vite)</td><td>Utility-first styling con la v4 (no <code>tailwind.config.js</code> classico).</td></tr>
+          <tr><td><strong>shadcn/ui</strong></td><td>(componenti copiati in <code>components/ui/</code>)</td><td>Base UI obbligatoria — niente componenti hand-rolled quando shadcn ne ha uno.</td></tr>
+          <tr><td><strong>Radix UI primitives</strong></td><td>@radix-ui/* (dietro shadcn)</td><td>Accessibility e behavior dei componenti shadcn.</td></tr>
+          <tr><td><strong>Vite</strong></td><td>(via @vitejs/plugin-react ^5)</td><td>Dev server e bundler; integra Wayfinder.</td></tr>
+          <tr><td><strong>ESLint + Prettier</strong></td><td>eslint ^9, prettier ^3</td><td>Lint e formatting; <code>npm run lint</code> autofixa import order.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="dati">Dati e infrastruttura</h2>
+      <table>
+        <thead><tr><th>Tecnologia</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><strong>MySQL 8</strong></td><td>Locale: <code>root</code>, no password, database <code>trainerhub</code>. Produzione: connessione MySQL standard (vedi <code>config/database.php</code>).</td></tr>
+          <tr><td><strong>UUID</strong></td><td>Chiavi primarie ovunque via trait <code>HasUuids</code>. Anche <code>tenants.id</code> usa UUID (generato da <code>Stancl\Tenancy\UUIDGenerator</code>).</td></tr>
+          <tr><td><strong>Importi monetari</strong></td><td>Sempre <strong>interi in centesimi</strong>. Mai float per il denaro.</td></tr>
+          <tr><td><strong>File storage</strong></td><td>Predisposto per S3-compatible (path prefissati con <code>tenants/{tenant_id}/</code>). Locale: filesystem default Laravel.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="cicd">CI/CD</h2>
+      <table>
+        <thead><tr><th>Workflow</th><th>Cosa fa</th></tr></thead>
+        <tbody>
+          <tr><td><code>deploy.yml</code></td><td>Su push a <code>main</code>: SSH deploy a <code>/var/www/hyoshi-staging</code> via <code>appleboy/ssh-action</code>. Composer install no-dev, migrate force, build con retry 3x.</td></tr>
+          <tr><td><code>tests.yml</code></td><td>Pest su PHP 8.4 e 8.5, Node 22. Trigger su push/PR a <code>main</code> e <code>production</code>.</td></tr>
+          <tr><td><code>lint.yml</code></td><td>Pint (PHP) + Prettier + ESLint. Stesso trigger di tests.</td></tr>
+          <tr><td><code>sync-docs.yml</code></td><td>Mirror di <code>docs/html/</code> verso <code>gorillaradio-dev/go-docs</code> per il portale centrale (<code>docs.gorillaradio.dev</code>).</td></tr>
+          <tr><td><code>claude.yml</code> · <code>claude-code-review.yml</code></td><td>Triage e review automatici con Claude Code GitHub Action.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="futuro">Predisposto (non ancora attivo)</h2>
+      <ul>
+        <li><strong>Laravel Cashier (Stripe)</strong> — abbonamenti del trainer alla piattaforma. Sprint 2 nel piano originale (vedi <code>docs/architecture.md</code>).</li>
+        <li><strong>Stripe Connect</strong> — colonna <code>tenants.stripe_account_id</code> già prevista per i pagamenti futuri degli allievi.</li>
+        <li><strong>Account allievi</strong> — colonna <code>students.user_id</code> nullable già in schema, attivabile lato applicativo.</li>
+        <li><strong>Custom domain per tenant</strong> — supportato dal package stancl/tenancy, abilitabile cambiando solo il middleware di identificazione.</li>
+      </ul>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>Le versioni qui sopra sono quelle dichiarate nei manifest. Per le versioni
+          effettivamente installate, leggi i lock file: <code>composer.lock</code> e
+          <code>package-lock.json</code>.</p></div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

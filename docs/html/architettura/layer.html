@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layer & moduli · TrainerHub</title>
+<meta name="description" content="Mappa per layer: HTTP, dominio, dati, frontend, test, CI/CD. File chiave e responsabilità.">
+<meta name="doc-title" content="Layer & moduli">
+<meta name="doc-section" content="Architettura">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>Architettura</span><span class="sep">/</span>
+        <span>Layer & moduli</span>
+      </div>
+
+      <h1>Layer & moduli</h1>
+
+      <p>
+        Questa pagina è una <strong>mappa pratica</strong> del codebase: per ciascun layer
+        applicativo trovi cosa contiene, i file chiave, e dove andare per approfondire. Pensala
+        come una bussola da consultare quando ti chiedi "dove vive questa responsabilità?".
+      </p>
+
+      <p>
+        Per la vista architetturale a flusso (richieste, dipendenze tra layer) vai a
+        <a data-href="architettura.html">Architettura · vista d'insieme</a>. Per il modello dati
+        vai a <a data-href="modello-dati.html">Modello dati</a>.
+      </p>
+
+      <h2 id="riepilogo">Riepilogo</h2>
+      <table>
+        <thead><tr><th>Layer</th><th>Dove vive</th><th>Conta file</th></tr></thead>
+        <tbody>
+          <tr><td>HTTP / Controller</td><td><code>app/Http/{Controllers,Requests,Middleware}</code>, <code>routes/</code></td><td>~32</td></tr>
+          <tr><td>Dominio / Service</td><td><code>app/Services</code>, <code>app/Enums</code>, <code>app/Policies</code>, <code>app/Providers</code></td><td>~16</td></tr>
+          <tr><td>Dati</td><td><code>app/Models</code>, <code>database/migrations</code>, <code>database/factories</code></td><td>~56</td></tr>
+          <tr><td>Frontend · Pagine</td><td><code>resources/js/pages</code></td><td>~26</td></tr>
+          <tr><td>Frontend · Componenti &amp; Layout</td><td><code>resources/js/components</code>, <code>resources/js/layouts</code></td><td>~42</td></tr>
+          <tr><td>Frontend · Hook, Utility, Type</td><td><code>resources/js/hooks</code>, <code>lib</code>, <code>types</code></td><td>~20</td></tr>
+          <tr><td>Test</td><td><code>tests/Feature</code>, <code>tests/Unit</code></td><td>~29</td></tr>
+          <tr><td>Configurazione</td><td><code>config/</code>, build/lint config</td><td>~25</td></tr>
+          <tr><td>CI/CD</td><td><code>.github/workflows/</code></td><td>~6</td></tr>
+          <tr><td>Documentazione</td><td><code>docs/</code>, <code>CLAUDE.md</code></td><td>~18</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="http">HTTP / Controller</h2>
+      <p>Lo strato sottile che riceve la richiesta, la valida e la passa al dominio.</p>
+      <ul>
+        <li><code>app/Http/Controllers/Tenant/StudentController.php</code> — gestione completa degli allievi: index con filtri, CRUD, sospendi/riattiva, ricerca.</li>
+        <li><code>app/Http/Controllers/Tenant/GroupController.php</code> — CRUD dei gruppi con conteggio iscritti.</li>
+        <li><code>app/Http/Controllers/Tenant/StudentPaymentController.php</code> — registrazione pagamenti mensili e di iscrizione.</li>
+        <li><code>app/Http/Controllers/Tenant/StudentGroupController.php</code> — attach/detach gruppo-allievo.</li>
+        <li><code>app/Http/Controllers/Tenant/DashboardController.php</code> — vista riepilogo del tenant.</li>
+        <li><code>app/Http/Controllers/Central/OnboardingController.php</code> — onboarding del trainer: crea il tenant con slug univoco.</li>
+        <li><code>app/Http/Middleware/EnsureTenantAccess.php</code> — guard ownership tenant (vedi <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>).</li>
+        <li><code>app/Http/Middleware/HandleInertiaRequests.php</code> — condivide auth, tenant e flash con il frontend.</li>
+        <li><code>app/Http/Requests/…</code> — FormRequest per la validazione (Store/Update di Student, Group, ecc.).</li>
+        <li><code>routes/tenant.php</code> · <code>routes/web.php</code> · <code>routes/settings.php</code> · <code>routes/auth.php</code> — le 4 file di route.</li>
+      </ul>
+      <p>Approfondimenti: <a data-href="http/routing.html">Routing</a>, <a data-href="http/controller.html">Controller &amp; FormRequest</a>, <a data-href="http/policy.html">Policy</a>.</p>
+
+      <h2 id="dominio">Dominio / Service</h2>
+      <p>La business logic — mai nei controller, sempre nei service.</p>
+      <ul>
+        <li><code>app/Services/FeeCalculationService.php</code> — tariffa effettiva (override → gruppo) e saldo studente.</li>
+        <li><code>app/Services/MonthlyFeeService.php</code> — calcolo periodi scoperti, registrazione pagamenti FIFO, conteggi batch.</li>
+        <li><code>app/Services/EnrollmentFeeService.php</code> — iscrizione e rinnovo, validità basata sui settings del tenant.</li>
+        <li><code>app/Enums/StudentStatus.php</code>, <code>PaymentMethod.php</code>, <code>DocumentType.php</code>, <code>DocumentStatus.php</code> — backed enum PHP 8.1.</li>
+        <li><code>app/Policies/StudentPolicy.php</code>, <code>GroupPolicy.php</code> — authorization per risorsa.</li>
+        <li><code>app/Providers/TenancyServiceProvider.php</code> — mappa gli eventi del ciclo di vita del tenant ai listener.</li>
+        <li><code>app/Providers/AppServiceProvider.php</code> — forza HTTPS in staging/production.</li>
+      </ul>
+      <p>Approfondimenti: <a data-href="dominio/quote-pagamenti.html">Quote &amp; pagamenti</a>, <a data-href="dominio/iscrizioni.html">Iscrizioni</a>, <a data-href="dominio/enum-stato.html">Enum di stato</a>.</p>
+
+      <h2 id="dati">Dati</h2>
+      <p>Modelli Eloquent, migrazioni, factory. Tutti i modelli tenant-scoped usano <code>HasUuids</code> + <code>BelongsToTenant</code>.</p>
+      <ul>
+        <li><code>app/Models/Student.php</code> — entità centrale del dominio (anagrafica, contatti, quote, gruppi, pagamenti).</li>
+        <li><code>app/Models/Group.php</code> · <code>GroupStudent.php</code> — gruppi e pivot many-to-many.</li>
+        <li><code>app/Models/MonthlyFee.php</code> · <code>EnrollmentFee.php</code> · <code>Payment.php</code> — quote attese e pagamenti effettivi.</li>
+        <li><code>app/Models/Document.php</code> · <code>EmergencyContact.php</code> — documenti e contatti d'emergenza.</li>
+        <li><code>app/Models/Tenant.php</code> · <code>User.php</code> — modelli centrali (non tenant-scoped).</li>
+        <li><code>database/migrations/</code> — una per tabella; le <code>restructure_*</code> più recenti collegano le quote a <code>payments</code>.</li>
+        <li><code>database/factories/</code> — factory per ogni modello (usate dai test).</li>
+      </ul>
+      <p>Approfondimenti: <a data-href="modello-dati.html">Modello dati</a>, <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>.</p>
+
+      <h2 id="frontend-pagine">Frontend · Pagine</h2>
+      <p>Componenti React Inertia. Mappa diretta con i controller backend.</p>
+      <ul>
+        <li><code>resources/js/pages/Tenant/Student/Index.tsx</code> — elenco allievi con filtri e pagamento rapido.</li>
+        <li><code>resources/js/pages/Tenant/Student/Show.tsx</code> — dettaglio allievo (anagrafica, contatti, gruppi, pagamenti).</li>
+        <li><code>resources/js/pages/Tenant/Student/{Create,Edit}.tsx</code> — form allievo.</li>
+        <li><code>resources/js/pages/Tenant/Group/{Index,Show,Create,Edit}.tsx</code> — gestione gruppi.</li>
+        <li><code>resources/js/pages/Tenant/Dashboard/Index.tsx</code> — dashboard del tenant.</li>
+        <li><code>resources/js/pages/Central/Onboarding/Create.tsx</code> — creazione del primo tenant.</li>
+        <li><code>resources/js/app.tsx</code> — entry point (risolve i componenti via <code>resolvePageComponent</code>).</li>
+        <li><code>resources/js/ssr.tsx</code> — entry point Server-Side Rendering.</li>
+      </ul>
+
+      <h2 id="frontend-componenti">Frontend · Componenti &amp; Layout</h2>
+      <ul>
+        <li><code>resources/js/components/student-form.tsx</code> — form allievo con contatti dinamici e override quota.</li>
+        <li><code>resources/js/components/group-form.tsx</code> — form gruppo.</li>
+        <li><code>resources/js/components/register-enrollment-dialog.tsx</code> · <code>student-payments-tab.tsx</code> — UI pagamenti.</li>
+        <li><code>resources/js/components/page-header.tsx</code> — header pagina con back button.</li>
+        <li><code>resources/js/components/tenant-{sidebar,mobile-header,bottom-nav}.tsx</code> — chrome di navigazione.</li>
+        <li><code>resources/js/components/ui/</code> — primitivi shadcn/ui (button, input, dialog, …).</li>
+        <li><code>resources/js/layouts/{tenant-layout,central-layout}.tsx</code> — layout persistenti Inertia.</li>
+      </ul>
+
+      <h2 id="frontend-utility">Frontend · Hook, Utility, Type</h2>
+      <ul>
+        <li><code>resources/js/hooks/use-tenant.ts</code> — accesso al tenant corrente da componenti tenant-scoped.</li>
+        <li><code>resources/js/hooks/use-appearance.ts</code> — gestione tema chiaro/scuro.</li>
+        <li><code>resources/js/lib/utils.ts</code> · <code>student-status.ts</code> — utility condivise.</li>
+        <li><code>resources/js/types/index.ts</code> — barrel dei type-definition di dominio.</li>
+        <li><code>resources/js/types/student.ts</code> — tipi Student/Group/Payment lato client.</li>
+        <li><code>resources/js/actions/</code> · <code>resources/js/routes/</code> — generati da Laravel Wayfinder (escluse dal lint).</li>
+      </ul>
+
+      <h2 id="test">Test</h2>
+      <ul>
+        <li><code>tests/Feature/Tenant/*Test.php</code> — feature test sui controller tenant (isolamento, CRUD, pagamenti).</li>
+        <li><code>tests/Feature/Tenant/PaymentEdgeCasesTest.php</code> — riferimento per casi limite del denaro.</li>
+        <li><code>tests/Feature/Tenant/StudentLifecycleTest.php</code> — copertura del refactor effective_status.</li>
+        <li><code>tests/Unit/Services/*Test.php</code> — unit test sui service (calcoli, edge case puri).</li>
+        <li><code>tests/TestCase.php</code> · <code>Pest.php</code> — boilerplate Pest.</li>
+      </ul>
+      <p>Approfondimento: <a data-href="operazioni/testing.html">Testing</a>.</p>
+
+      <h2 id="config">Configurazione</h2>
+      <ul>
+        <li><code>config/tenancy.php</code> — bootstrappers, identification, central domains. <strong>File critico.</strong></li>
+        <li><code>config/fortify.php</code> — feature di autenticazione (2FA, recovery codes).</li>
+        <li><code>config/database.php</code> · <code>config/session.php</code> · <code>config/cache.php</code> — connessioni e storage.</li>
+        <li><code>vite.config.ts</code> · <code>tsconfig.json</code> · <code>eslint.config.js</code> · <code>composer.json</code> — build e tooling.</li>
+        <li><code>CLAUDE.md</code> — convenzioni di progetto (la fonte di verità sulle regole).</li>
+      </ul>
+
+      <h2 id="cicd">CI/CD</h2>
+      <ul>
+        <li><code>.github/workflows/deploy.yml</code> — deploy SSH su push a <code>main</code>.</li>
+        <li><code>.github/workflows/tests.yml</code> — Pest su PHP 8.4 e 8.5.</li>
+        <li><code>.github/workflows/lint.yml</code> — Pint + ESLint + Prettier.</li>
+        <li><code>.github/workflows/sync-docs.yml</code> — mirror di <code>docs/html/</code> verso il portale centrale.</li>
+        <li><code>.github/workflows/claude.yml</code> · <code>claude-code-review.yml</code> — review automatiche.</li>
+      </ul>
+      <p>Approfondimenti: <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>, <a data-href="operazioni/branch-strategy.html">Branch strategy</a>.</p>
+
+      <h2 id="docs">Documentazione</h2>
+      <ul>
+        <li><code>docs/architecture.md</code> — design originale (più dettagliato dello stato corrente).</li>
+        <li><code>docs/ONBOARDING.md</code> — guida onboarding generata da <code>understand-onboard</code>.</li>
+        <li><code>docs/html/</code> — questo portale.</li>
+        <li><code>docs/_sidebar.html</code> — sorgente unico della sidebar; non editare nei singoli pagine.</li>
+        <li><code>docs/plans/</code> — piani feature (es. student lifecycle refactor, gruppi pagamenti).</li>
+      </ul>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

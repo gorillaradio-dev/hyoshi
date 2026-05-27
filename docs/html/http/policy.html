@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Policy & authorization · TrainerHub</title>
+<meta name="description" content="StudentPolicy, GroupPolicy, scoping tenant come secondo livello di difesa.">
+<meta name="doc-title" content="Policy & authorization">
+<meta name="doc-section" content="HTTP">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+
+<!-- ===== TOP BAR (identica in ogni pagina) ===== -->
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand">
+    <a class="brand-portal" href="/">
+      <span class="logo">◎</span>
+      <span>Gorillaradio docs</span>
+    </a>
+    <span class="brand-sep">/</span>
+    <a class="brand-project" data-href="index.html">TrainerHub</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca nella doc…  (premi /)" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="cambia tema">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR — gestita da sync_sidebar.py, non editare a mano qui ===== -->
+  <!-- SIDEBAR:START -->
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="nav-head">Inizia</div>
+    <a data-href="index.html">Home</a>
+    <a data-href="overview.html">Panoramica</a>
+    <a data-href="inizia/onboarding.html">Onboarding sviluppatore</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Architettura</div>
+    <a data-href="architettura.html">Vista d'insieme</a>
+    <a data-href="architettura/multi-tenancy.html">Multi-tenancy</a>
+    <a data-href="architettura/stack.html">Stack tecnologico</a>
+    <a data-href="architettura/layer.html">Layer &amp; moduli</a>
+    <a data-href="modello-dati.html">Modello dati</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Dominio</div>
+    <a data-href="dominio/studenti-gruppi.html">Studenti e gruppi</a>
+    <a data-href="dominio/quote-pagamenti.html">Quote mensili e pagamenti</a>
+    <a data-href="dominio/iscrizioni.html">Iscrizioni (enrollment)</a>
+    <a data-href="dominio/enum-stato.html">Enum di stato e tipo</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">HTTP</div>
+    <a data-href="http/routing.html">Routing tenant vs central</a>
+    <a data-href="http/controller.html">Controller &amp; FormRequest</a>
+    <a data-href="http/policy.html">Policy &amp; authorization</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Frontend</div>
+    <a data-href="frontend/inertia.html">Architettura Inertia</a>
+    <a data-href="frontend/pagine.html">Pagine principali</a>
+    <a data-href="frontend/layout.html">Layout &amp; navigazione mobile</a>
+    <a data-href="frontend/convenzioni.html">Convenzioni (TS, shadcn, mobile)</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Operazioni</div>
+    <a data-href="operazioni/setup.html">Setup locale</a>
+    <a data-href="operazioni/deploy.html">Deploy &amp; CI/CD</a>
+    <a data-href="operazioni/branch-strategy.html">Branch strategy</a>
+    <a data-href="operazioni/testing.html">Testing</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-head">Riferimenti</div>
+    <a data-href="riferimenti/hotspot.html">Hotspot di complessità</a>
+  </div>
+</nav>
+      <!-- SIDEBAR:END -->
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+    <div class="page">
+
+      <div class="breadcrumb">
+        <a data-href="index.html">Home</a><span class="sep">/</span>
+        <span>HTTP</span><span class="sep">/</span>
+        <span>Policy & authorization</span>
+      </div>
+
+      <h1>Policy & authorization</h1>
+
+      <p>
+        L'autorizzazione in TrainerHub funziona a <strong>tre livelli</strong>: middleware
+        <code>tenant.access</code> (ownership tenant), global scope Eloquent (filtro dati), e
+        Policy per risorsa (permesso sull'azione). Le Policy sono il livello applicativo: il
+        controller chiama <code>$this-&gt;authorize(...)</code> prima di ogni azione, e Laravel
+        risolve la Policy giusta in base al modello.
+      </p>
+
+      <h2 id="modello-difesa">Modello di difesa</h2>
+
+      <div class="diagram">
+        <div class="diagram-bar">
+          <span>Livelli di autorizzazione</span>
+          <div class="diagram-tools">
+            <button data-act="out" aria-label="zoom out">−</button>
+            <button data-act="reset" aria-label="reset">⊙</button>
+            <button data-act="in" aria-label="zoom in">+</button>
+          </div>
+        </div>
+        <div class="diagram-viewport">
+<pre class="mermaid">
+flowchart TB
+  R[Request]
+  L1["Livello 1<br/>middleware tenant.access<br/>l'utente è owner di questo tenant?"]
+  L2["Livello 2<br/>global scope BelongsToTenant<br/>la query vede solo righe del tenant"]
+  L3["Livello 3<br/>Policy<br/>l'utente può fare QUESTA azione su QUESTA risorsa?"]
+  OK[OK → controller esegue]
+  R --> L1
+  L1 --> L2
+  L2 --> L3
+  L3 --> OK
+  L1 -. fail .-> X1[403]
+  L2 -. miss .-> X2[404 model not found]
+  L3 -. fail .-> X3[403]
+</pre>
+        </div>
+      </div>
+
+      <p>
+        Le tre difese sono <strong>complementari</strong>, non ridondanti: il middleware blocca
+        accessi a tenant non tuoi, lo scope impedisce di vedere righe altrui anche per errore di
+        codice, e la Policy decide se <em>quella specifica azione</em> è permessa.
+      </p>
+
+      <h2 id="policy-esistenti">Policy esistenti</h2>
+      <table>
+        <thead><tr><th>Policy</th><th>Modello</th><th>Azioni</th></tr></thead>
+        <tbody>
+          <tr><td><code>StudentPolicy</code></td><td><code>Student</code></td><td>viewAny, view, create, update, delete</td></tr>
+          <tr><td><code>GroupPolicy</code></td><td><code>Group</code></td><td>viewAny, view, create, update, delete</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="esempio">Esempio: <code>StudentPolicy</code></h2>
+      <p>
+        File: <code>app/Policies/StudentPolicy.php</code>. Tutte le azioni oggi ritornano
+        <code>true</code> perché l'unico utente possibile è l'<strong>owner del tenant</strong>
+        (già verificato dal middleware <code>tenant.access</code>). Quando aggiungeremo ruoli
+        (admin, collaboratore, sola lettura), la logica vivrà qui.
+      </p>
+
+      <pre><code>namespace App\Policies;
+
+use App\Models\Student;
+use App\Models\User;
+
+class StudentPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return true; // tenant.access middleware già verifica accesso
+    }
+
+    public function view(User $user, Student $student): bool
+    {
+        return true;
+    }
+
+    public function create(User $user): bool
+    {
+        return true;
+    }
+
+    public function update(User $user, Student $student): bool
+    {
+        return true;
+    }
+
+    public function delete(User $user, Student $student): bool
+    {
+        return true;
+    }
+}</code></pre>
+
+      <div class="callout info">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><p>L'apparente "no-op" delle Policy è intenzionale: la struttura è già pronta per
+          ricevere logica di ruolo. Quando arriverà, <strong>non serve cambiare i controller</strong> —
+          basta editare la Policy.</p></div>
+      </div>
+
+      <h2 id="uso">Come si usano nei controller</h2>
+      <p>
+        In ogni metodo del controller, <strong>la prima riga</strong> è la chiamata a
+        <code>authorize</code>. Laravel risolve la Policy in base al modello passato come secondo
+        argomento.
+      </p>
+
+      <pre><code>// Sull'intero modello (per viewAny / create):
+$this-&gt;authorize('viewAny', Student::class);
+$this-&gt;authorize('create', Student::class);
+
+// Su un'istanza (per view / update / delete):
+$this-&gt;authorize('view', $student);
+$this-&gt;authorize('update', $student);
+$this-&gt;authorize('delete', $student);</code></pre>
+
+      <p>
+        Se la Policy ritorna <code>false</code>, Laravel risponde con <code>403 Forbidden</code>
+        automaticamente. Niente <code>if</code> espliciti, niente check ridondanti.
+      </p>
+
+      <h2 id="registrazione">Registrazione automatica</h2>
+      <p>
+        Laravel 11+ <strong>scopre le Policy automaticamente</strong> in base alla convenzione di
+        naming: <code>App\Models\Student</code> → <code>App\Policies\StudentPolicy</code>. Non
+        serve mappa manuale in <code>AuthServiceProvider</code> (assente in questo progetto).
+      </p>
+      <p>
+        Se una Policy con il nome convenzionale non esiste, <code>authorize</code> lancia
+        <code>AuthorizationException</code> al primo accesso. Quindi: <strong>aggiungere una
+        Policy ogni volta che aggiungi un modello tenant-scoped</strong> è obbligatorio.
+      </p>
+
+      <h2 id="frontend">Lato frontend</h2>
+      <p>
+        Inertia non espone Policy al client come fa Laravel-Sanctum o Spatie/permission. Se serve
+        una verifica lato UI (es. nascondere il bottone "elimina"), passa il flag come prop
+        Inertia calcolato lato controller:
+      </p>
+      <pre><code>return Inertia::render('Tenant/Student/Show', [
+    'student' =&gt; $student,
+    'can' =&gt; [
+        'update' =&gt; $request-&gt;user()-&gt;can('update', $student),
+        'delete' =&gt; $request-&gt;user()-&gt;can('delete', $student),
+    ],
+]);</code></pre>
+
+      <h2 id="future">Esempio: aggiungere ruolo "sola lettura"</h2>
+      <p>
+        Scenario futuro: un collaboratore del trainer può vedere gli studenti ma non modificarli.
+      </p>
+
+      <pre><code>// 1. Aggiungi una colonna users.role oppure una tabella tenant_user pivot
+
+// 2. Estendi tenant.access per ammettere anche i collaboratori
+class EnsureTenantAccess
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $tenant = tenant();
+        $user = $request-&gt;user();
+
+        $isOwner = $tenant?-&gt;owner_id === $user-&gt;id;
+        $isMember = $tenant?-&gt;members()-&gt;where('user_id', $user-&gt;id)-&gt;exists();
+
+        if (! $tenant || (! $isOwner && ! $isMember)) {
+            abort(403);
+        }
+
+        return $next($request);
+    }
+}
+
+// 3. Restringi le Policy per ruolo
+class StudentPolicy
+{
+    public function update(User $user, Student $student): bool
+    {
+        return tenant()-&gt;owner_id === $user-&gt;id
+            || $user-&gt;tenantRole(tenant())-&gt;canEdit();
+    }
+}</code></pre>
+
+      <p>
+        Tre file toccati, controller invariati. <strong>Questo</strong> è il vantaggio dell'aver
+        tenuto le Policy pulite anche quando "non servono".
+      </p>
+
+    </div>
+  </main>
+
+  <aside class="toc">
+    <div class="toc-head">In questa pagina</div>
+    <div class="toc-list"></div>
+  </aside>
+</div>
+
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>
